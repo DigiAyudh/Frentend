@@ -1,19 +1,29 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { fetchCurrentUser } from '../redux/slices/authSlice'
+import { useSession } from '@/hooks/useSession'
+import { AuthProvider } from '@/contexts/auth.context'
 import { Loader } from 'lucide-react'
+import { tokenManager } from '@/utils/tokenManager'
 
 interface AuthInitializerProps {
   children: React.ReactNode
 }
 
-export default function AuthInitializer({ children }: AuthInitializerProps) {
+function AuthInitializerContent({ children }: AuthInitializerProps) {
   const dispatch = useAppDispatch()
   const { initializing, token } = useAppSelector((state) => state.auth)
+  useSession() // Initialize session management
 
   useEffect(() => {
     if (token) {
-      dispatch(fetchCurrentUser())
+      // Verify token is valid before fetching user
+      if (tokenManager.isTokenValid()) {
+        dispatch(fetchCurrentUser())
+      } else {
+        // Clear invalid token
+        tokenManager.clearTokens()
+      }
     }
   }, [dispatch, token])
 
@@ -29,4 +39,12 @@ export default function AuthInitializer({ children }: AuthInitializerProps) {
   }
 
   return <>{children}</>
+}
+
+export default function AuthInitializer({ children }: AuthInitializerProps) {
+  return (
+    <AuthProvider>
+      <AuthInitializerContent>{children}</AuthInitializerContent>
+    </AuthProvider>
+  )
 }

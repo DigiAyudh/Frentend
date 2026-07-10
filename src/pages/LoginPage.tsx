@@ -50,9 +50,21 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const redirectTo = await login(data);
+      const roleMap: Record<string, any> = {
+        'client@digiayudh.com': 'client',
+        'employee@digiayudh.com': 'employee',
+        'admin@digiayudh.com': 'admin',
+        'superadmin@digiayudh.com': 'admin',
+      };
+      const role = roleMap[data.email] || 'client';
+      await login(data.email, data.password, role as any);
       toast.success('Welcome back!');
-      navigate(redirectTo);
+      const dashboardRoutes: Record<string, string> = {
+        admin: '/admin',
+        employee: '/employee',
+        client: '/client',
+      };
+      navigate(dashboardRoutes[role] || '/client');
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message ?? 'Login failed');

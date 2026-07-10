@@ -1,3 +1,5 @@
+'use client'
+
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -26,20 +28,6 @@ const details = [
   { icon: Phone, label: 'Phone', value: '+1 (555) 018-2049' },
   { icon: MapPin, label: 'Office', value: 'Bengaluru · Remote-first' },
 ]
-  const {
-    register,
-    control,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      countryCode: '+91',
-      phone: '',
-      country: 'India',
-    },
-  })
 
 export function ContactSection() {
   const dispatch = useAppDispatch()
@@ -92,65 +80,21 @@ export function ContactSection() {
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField label="Name" htmlFor="c-name" error={errors.name?.message} required>
-                <Input id="c-name" placeholder="   Ayush" {...register('name')} />
+                <Input id="c-name" placeholder="Ayush" {...register('name')} />
               </FormField>
               <FormField label="Email" htmlFor="c-email" error={errors.email?.message} required>
-                <Input id="c-email" type="email" placeholder="   ayush@company.com" {...register('email')} />
+                <Input id="c-email" type="email" placeholder="ayush@company.com" {...register('email')} />
               </FormField>
-                      <Field label="Phone Number" error={errors.phone?.message}>
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field }) => (
-              <PhoneInput
-                country="in"
-                enableSearch
-                value={field.value}
-                onChange={(value, country) => {
-                  field.onChange(value)
-
-                  if (country && typeof country !== 'string') {
-                    setValue('countryCode', `+${country.dialCode}`)
-                  }
-                }}
-                inputStyle={{
-                  width: '100%',
-                  height: '46px',
-                  background: '#0F172A',
-                  color: '#fff',
-                  border: '1px solid #334155',
-                  borderRadius: '12px',
-                  paddingLeft: '52px',
-                  fontSize: '14px',
-                }}
-                buttonStyle={{
-                  background: '#0F172A',
-                  border: '1px solid #334155',
-                  borderRadius: '12px 0 0 12px',
-                }}
-                dropdownStyle={{
-                  background: '#0F172A',
-                  color: '#fff',
-                  border: '1px solid #334155',
-                  maxHeight: '300px',
-                }}
-                searchStyle={{
-                  background: '#1E293B',
-                  color: '#fff',
-                }}
-              />
-            )}
-          />
-        </Field>
-
-        <input type="hidden" {...register('countryCode')} />
+              <FormField label="Phone" htmlFor="c-phone" error={errors.phone?.message}>
+                <Input id="c-phone" type="tel" placeholder="+1 (555) 000-0000" {...register('phone')} />
+              </FormField>
               <FormField label="Company" htmlFor="c-company" error={errors.company?.message}>
-                <Input id="c-company" placeholder="   DigiAyudh." {...register('company')} />
+                <Input id="c-company" placeholder="DigiAyudh" {...register('company')} />
               </FormField>
             </div>
             <div className="mt-4">
               <FormField label="Subject" htmlFor="c-subject" error={errors.subject?.message} required>
-                <Input id="c-subject" placeholder="   How can we help?" {...register('subject')} />
+                <Input id="c-subject" placeholder="How can we help?" {...register('subject')} />
               </FormField>
             </div>
             <div className="mt-4">

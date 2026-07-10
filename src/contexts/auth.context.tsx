@@ -3,51 +3,51 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState,
   type ReactNode,
 } from 'react';
-import { getDashboardRoute, getStoredUser, isAuthenticated, login as authLogin, logout as authLogout } from '@/services/api';
-import type { LoginCredentials, User } from '@/types';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { login as loginAction, logout as logoutAction } from '@/redux/slices/authSlice';
+import type { User, UserRole } from '@/types';
 
 interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<string>;
-  logout: () => void;
+  login: (email: string, password: string, role?: UserRole) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => getStoredUser());
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated, loading } = useAppSelector((state) => state.auth);
 
-  const login = useCallback(async (credentials: LoginCredentials) => {
-    setIsLoading(true);
+  const login = useCallback(async (email: string, password: string, expectedRole?: UserRole) => {
     try {
-      const response = await authLogin(credentials);
-      setUser(response.user);
-      return getDashboardRoute(response.user.role);
-    } finally {
-      setIsLoading(false);
+      await dispatch(loginAction({ email, password, expectedRole: expectedRole || 'client' })).unwrap();
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Login failed');
     }
-  }, []);
+  }, [dispatch]);
 
-  const logout = useCallback(() => {
-    authLogout();
-    setUser(null);
-  }, []);
+  const logout = useCallback(async () => {
+    try {
+      await dispatch(logoutAction()).unwrap();
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Logout failed');
+    }
+  }, [dispatch]);
 
   const value = useMemo(
     () => ({
       user,
-      isAuthenticated: isAuthenticated() && !!user,
-      isLoading,
+      isAuthenticated,
+      isLoading: loading,
       login,
       logout,
     }),
-    [user, isLoading, login, logout],
+    [user, isAuthenticated, loading, login, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

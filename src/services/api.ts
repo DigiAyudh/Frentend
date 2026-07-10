@@ -47,8 +47,15 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'X-XSS-Protection': '1; mode=block',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+      },
       timeout: 30000,
+      withCredentials: true, // Enable CORS credentials
     })
 
     this.client.interceptors.request.use((config) => {
@@ -56,6 +63,16 @@ class ApiClient {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
       }
+      
+      // Add CSRF token if available
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken
+      }
+      
+      // Add request ID for tracing
+      config.headers['X-Request-ID'] = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      
       return config
     })
 
