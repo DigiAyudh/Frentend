@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast from 'react-hot-toast'
@@ -11,10 +11,13 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 import { FormField } from '../common/FormField'
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
 
 const schema = z.object({
   name: z.string().min(2, 'Please enter your name'),
   email: z.string().email('Enter a valid email'),
+  countryCode: z.string().optional(),
   phone: z.string().optional(),
   company: z.string().optional(),
   subject: z.string().min(3, 'Add a short subject'),
@@ -35,10 +38,18 @@ export function ContactSection() {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
-  } = useForm<ContactForm>({ resolver: zodResolver(schema) })
+  } = useForm<ContactForm>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      countryCode: '+1',
+      phone: '',
+    },
+  })
 
   const onSubmit = async (values: ContactForm) => {
     const result = await dispatch(submitContactRequest(values))
@@ -85,8 +96,49 @@ export function ContactSection() {
               <FormField label="Email" htmlFor="c-email" error={errors.email?.message} required>
                 <Input id="c-email" type="email" placeholder="ayush@company.com" {...register('email')} />
               </FormField>
-              <FormField label="Phone" htmlFor="c-phone" error={errors.phone?.message}>
-                <Input id="c-phone" type="tel" placeholder="+1 (555) 000-0000" {...register('phone')} />
+              <FormField label="Phone" error={errors.phone?.message}>
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field }) => (
+                    <PhoneInput
+                      country="us"
+                      enableSearch
+                      value={field.value || ''}
+                      onChange={(value, country) => {
+                        field.onChange(value)
+                        if (country && typeof country !== 'string') {
+                          setValue('countryCode', `+${country.dialCode}`)
+                        }
+                      }}
+                      inputStyle={{
+                        width: '100%',
+                        height: '40px',
+                        background: 'hsl(var(--input))',
+                        color: 'hsl(var(--foreground))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        paddingLeft: '52px',
+                        fontSize: '14px',
+                      }}
+                      buttonStyle={{
+                        background: 'hsl(var(--input))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px 0 0 8px',
+                      }}
+                      dropdownStyle={{
+                        background: 'hsl(var(--card))',
+                        color: 'hsl(var(--foreground))',
+                        border: '1px solid hsl(var(--border))',
+                        maxHeight: '300px',
+                      }}
+                      searchStyle={{
+                        background: 'hsl(var(--input))',
+                        color: 'hsl(var(--foreground))',
+                      }}
+                    />
+                  )}
+                />
               </FormField>
               <FormField label="Company" htmlFor="c-company" error={errors.company?.message}>
                 <Input id="c-company" placeholder="DigiAyudh" {...register('company')} />

@@ -4,7 +4,13 @@ import { Button } from '@/components/ui/button';
 import { HeroDashboardMockup } from '../common/hero-dashboard-mockup';
 import { APP_CONFIG } from '@/config/navigation';
 
-const avatars = ['AK', 'RM', 'NS', 'VT', 'PL'];
+const avatars = [
+  { initials: 'AK', bg: 'from-pink-500 to-red-500' },
+  { initials: 'GD', bg: 'from-orange-500 to-yellow-500' },
+  { initials: 'ME', bg: 'from-green-500 to-teal-500' },
+  { initials: 'VT', bg: 'from-blue-500 to-purple-500' },
+  { initials: 'PL', bg: 'from-purple-500 to-pink-500' },
+];
 
 export function HeroSection() {
   return (
@@ -32,7 +38,8 @@ export function HeroSection() {
               className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl"
             >
               We build digital products that{' '}
-              <span className="text-gradient">move businesses</span> forward.
+              <span className="text-violet-500">move businesses</span>{' '}
+              forward.
             </motion.h1>
 
             <motion.p
@@ -73,12 +80,12 @@ export function HeroSection() {
               className="mt-10 flex items-center gap-4"
             >
               <div className="flex -space-x-2">
-                {avatars.map((a) => (
+                {avatars.map((avatar) => (
                   <div
-                    key={a}
-                    className="flex size-8 items-center justify-center rounded-full border-2 border-background bg-gradient-to-br from-violet-500 to-purple-600 text-[10px] font-bold text-white"
+                    key={avatar.initials}
+                    className={`flex size-8 items-center justify-center rounded-full border-2 border-background bg-gradient-to-br ${avatar.bg} text-[10px] font-bold text-white`}
                   >
-                    {a}
+                    {avatar.initials}
                   </div>
                 ))}
                 <div className="flex size-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground">

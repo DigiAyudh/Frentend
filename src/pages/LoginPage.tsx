@@ -3,14 +3,12 @@ import { ArrowRight, ArrowUpRight, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { APP_CONFIG } from '@/config/navigation';
 import { useAuth } from '@/contexts/auth.context';
 import type { ApiError } from '@/types';
@@ -23,13 +21,6 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-const demoAccounts = [
-  { role: 'Client', email: 'client@digiayudh.com', password: 'Client@123' },
-  { role: 'Employee', email: 'employee@digiayudh.com', password: 'Employee@123' },
-  { role: 'Admin', email: 'admin@digiayudh.com', password: 'Admin@123' },
-  { role: 'Super Admin', email: 'superadmin@digiayudh.com', password: 'Super@123' },
-];
-
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, isLoading } = useAuth();
@@ -38,7 +29,6 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     formState: { errors },
   } = useForm<LoginFormData>({
@@ -71,39 +61,30 @@ export default function LoginPage() {
     }
   };
 
-  const fillDemo = (email: string, password: string) => {
-    setValue('email', email);
-    setValue('password', password);
-  };
-
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
       <div className="pointer-events-none absolute inset-0 bg-grid" />
-      <div className="pointer-events-none absolute left-1/2 top-0 size-[500px] -translate-x-1/2 rounded-full bg-purple-600/10 blur-3xl" />
-
-      <div className="absolute right-4 top-4">
-        <ThemeToggle />
-      </div>
+      <div className="pointer-events-none absolute -right-40 -top-40 size-[500px] rounded-full bg-purple-600/5 blur-3xl" />
+      <div className="pointer-events-none absolute -left-40 bottom-0 size-[500px] rounded-full bg-blue-600/5 blur-3xl" />
 
       <div className="relative w-full max-w-md">
-        <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg">
-            <img
-              src="/DigiAyudhlogo.jpeg"
-              alt="DigiAyudh Logo"
-              className="h-8 w-8 rounded-lg object-cover"
-            />
-          </div>
-            <span className="text-xl font-bold">{APP_CONFIG.name}</span>
+        <div className="mb-10 text-center">
+          <Link to="/" className="inline-flex items-center gap-2 mb-6">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/20">
+              <img
+                src="/digiayudh-logo.jpeg"
+                alt="DigiAyudh Logo"
+                className="h-8 w-8 rounded-lg object-cover"
+              />
+            </div>
           </Link>
-          <p className="mt-2 text-sm text-muted-foreground">{APP_CONFIG.tagline}</p>
+          <h1 className="text-3xl font-bold text-foreground">Welcome back</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Sign in to your DigiAyudh account</p>
         </div>
 
-        <Card className="border-border/50 shadow-xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to access your portal</CardDescription>
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-xl">
+          <CardHeader className="space-y-1 pb-5">
+            <CardDescription className="text-xs uppercase tracking-wider text-muted-foreground">Login</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -149,53 +130,34 @@ export default function LoginPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="remember"
-                    checked={remember}
-                    onCheckedChange={(v) => setValue('remember', v)}
-                  />
-                  <Label htmlFor="remember" className="text-sm font-normal">
-                    Remember me
-                  </Label>
-                </div>
-                <a href="#" className="text-sm text-purple-400 hover:text-purple-300">
+              <div className="flex items-center justify-end">
+                <a href="#" className="text-xs text-primary hover:text-primary-dark transition-colors">
                   Forgot password?
                 </a>
               </div>
 
-              <Button variant="brand" className="w-full" type="submit" disabled={isLoading}>
-                {isLoading ? 'Signing in...' : 'Login'}
+              <Button variant="brand" className="w-full h-11" type="submit" disabled={isLoading}>
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>
-              <a href="/signup" className="text-sm text-purple-400 hover:text-purple-300">
-                  Sign up for an account
-                </a>
-            </form>
 
-            
-
-            <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">
-              <p className="mb-3 text-xs font-medium text-muted-foreground">Demo accounts</p>
-              <div className="grid grid-cols-2 gap-2">
-                {demoAccounts.map((acc) => (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    onClick={() => fillDemo(acc.email, acc.password)}
-                    className="rounded-lg border border-border bg-background px-2 py-1.5 text-left text-xs transition-colors hover:border-purple-500/30 hover:bg-purple-500/5"
-                  >
-                    <span className="font-medium">{acc.role}</span>
-                  </button>
-                ))}
+              <div className="relative flex items-center gap-2">
+                <div className="flex-1 border-t border-border" />
+                <span className="text-xs text-muted-foreground">or</span>
+                <div className="flex-1 border-t border-border" />
               </div>
-            </div>
+
+              <Link to="/signup" className="block">
+                <Button variant="outline" className="w-full h-11">
+                  Create account
+                </Button>
+              </Link>
+            </form>
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          <Link to="/" className="text-purple-400 hover:text-purple-300">
-            ← Back to website
+        <p className="mt-8 text-center text-xs text-muted-foreground">
+          <Link to="/" className="text-primary hover:text-primary-dark transition-colors">
+            Back to website
           </Link>
         </p>
       </div>

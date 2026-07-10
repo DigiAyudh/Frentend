@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { logout } from '@/redux/slices/authSlice';
 import { tokenManager } from '@/utils/tokenManager';
 import ENV from '@/config/env';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 
 export function useSession() {
   const dispatch = useAppDispatch();

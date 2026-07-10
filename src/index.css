@@ -14,27 +14,27 @@
 /*  Design tokens (HSL). Light is default, .dark overrides.            */
 /* ------------------------------------------------------------------ */
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  --background: 0 0% 100%;
+  --foreground: 222 30% 10%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 222 30% 10%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 222 30% 10%;
 
-  --primary: 258 90% 61%;
+  --primary: 271 81% 56%;
   --primary-foreground: 0 0% 100%;
-  --primary-dark: 262 83% 52%;
+  --primary-dark: 271 81% 46%;
 
-  --secondary: 172 66% 45%;
+  --secondary: 172 66% 40%;
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 214 32% 94%;
-  --muted-foreground: 215 20% 45%;
+  --muted: 210 20% 96%;
+  --muted-foreground: 215 16% 45%;
 
-  --accent: 258 90% 96%;
-  --accent-foreground: 258 60% 40%;
+  --accent: 268 60% 96%;
+  --accent-foreground: 268 60% 35%;
 
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
@@ -43,25 +43,25 @@
   --success-foreground: 0 0% 100%;
 
   --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
+  --warning-foreground: 30 50% 10%;
 
   --info: 217 91% 60%;
   --info-foreground: 0 0% 100%;
 
-  --border: 214 32% 88%;
-  --input: 214 32% 88%;
-  --ring: 258 90% 61%;
+  --border: 214 20% 88%;
+  --input: 214 20% 88%;
+  --ring: 271 81% 56%;
 
   /* Surfaces / legacy aliases used across existing pages */
   --surface: 0 0% 100%;
-  --surface-dark: 214 32% 96%;
-  --text: 222 47% 11%;
-  --text-light: 215 20% 45%;
+  --surface-dark: 210 20% 96%;
+  --text: 222 30% 10%;
+  --text-light: 215 16% 45%;
 
   /* Sidebar */
   --sidebar: 0 0% 100%;
-  --sidebar-foreground: 222 47% 11%;
-  --sidebar-border: 214 32% 90%;
+  --sidebar-foreground: 222 30% 10%;
+  --sidebar-border: 214 20% 88%;
 
   /* Glass */
   --glass-bg: 255 255 255;
@@ -71,27 +71,27 @@
 }
 
 .dark {
-  --background: 228 47% 5%;
+  --background: 222 30% 4%;
   --foreground: 210 40% 98%;
 
-  --card: 224 39% 10%;
+  --card: 220 25% 10%;
   --card-foreground: 210 40% 98%;
 
-  --popover: 224 39% 10%;
+  --popover: 220 25% 10%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 258 90% 66%;
+  --primary: 271 81% 56%;
   --primary-foreground: 0 0% 100%;
-  --primary-dark: 262 83% 58%;
+  --primary-dark: 271 81% 46%;
 
   --secondary: 172 66% 45%;
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 223 34% 16%;
-  --muted-foreground: 215 25% 65%;
+  --muted: 218 25% 20%;
+  --muted-foreground: 210 15% 65%;
 
-  --accent: 258 40% 20%;
-  --accent-foreground: 258 90% 85%;
+  --accent: 268 60% 35%;
+  --accent-foreground: 268 100% 90%;
 
   --destructive: 0 72% 55%;
   --destructive-foreground: 0 0% 100%;
@@ -105,20 +105,20 @@
   --info: 217 91% 65%;
   --info-foreground: 0 0% 100%;
 
-  --border: 223 30% 18%;
-  --input: 223 30% 20%;
-  --ring: 258 90% 66%;
+  --border: 218 28% 18%;
+  --input: 218 28% 18%;
+  --ring: 268 81% 56%;
 
-  --surface: 224 39% 10%;
-  --surface-dark: 228 43% 7%;
+  --surface: 218 30% 12%;
+  --surface-dark: 220 25% 8%;
   --text: 210 40% 98%;
-  --text-light: 215 25% 65%;
+  --text-light: 210 15% 70%;
 
-  --sidebar: 224 42% 8%;
+  --sidebar: 218 30% 12%;
   --sidebar-foreground: 210 40% 98%;
-  --sidebar-border: 223 30% 16%;
+  --sidebar-border: 218 28% 18%;
 
-  --glass-bg: 17 24 39;
+  --glass-bg: 15 23 42;
   --glass-border: 255 255 255;
 
   --radius: 0.75rem;
@@ -262,6 +262,17 @@
   }
 }
 
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3), 
+                0 0 40px hsl(var(--primary) / 0.15);
+  }
+  50% {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.5), 
+                0 0 60px hsl(var(--primary) / 0.25);
+  }
+}
+
 .animate-shimmer::after {
   content: "";
   position: absolute;
@@ -274,4 +285,32 @@
     transparent
   );
   animation: shimmer 1.6s infinite;
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+}
+
+.glow-sm {
+  box-shadow: 0 0 12px hsl(var(--primary) / 0.25);
+}
+
+.text-glow {
+  text-shadow: 0 0 10px hsl(var(--primary) / 0.4);
+}
+
+/* Grid Pattern Background */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--primary) / 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0, 0 0;
+}
+
+.bg-grid-2 {
+  background-image:
+    linear-gradient(to right, hsl(var(--primary) / 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.12) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

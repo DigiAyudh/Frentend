@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast'
 import { store } from './redux/store'
 import { ThemeProvider } from './lib/theme'
-import { useTheme } from '@/contexts/theme.context'
 import AuthInitializer from './components/AuthInitializer'
 import PrivateRoute from './components/PrivateRoute'
 import DashboardLayout from './layouts/DashboardLayout'
@@ -12,6 +11,7 @@ import DashboardLayout from './layouts/DashboardLayout'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
 import PendingVerification from './pages/PendingVerification'
 import NotFound from './pages/NotFoundPage'
 
@@ -58,6 +58,7 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/pending-verification" element={<PendingVerification />} />
 
               {/* Admin Dashboard */}
