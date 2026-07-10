@@ -43,12 +43,21 @@ export function Sidebar({
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-5">
-          <NavLink to={`/${role}`} className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Layers className="h-5 w-5" />
-            </div>
-            <span className="font-bold text-sidebar-foreground">DigiAyudh</span>
-          </NavLink>
+          
+          <NavLink
+  to={`/${role}`}
+  className="flex items-center gap-2"
+>
+  <img
+    src="/digiayudh-logo.jpeg"
+    alt="DigiAyudh Logo"
+    className="h-8 w-8 rounded-lg object-cover"
+  />
+
+  <span className="text-lg font-bold text-sidebar-foreground">
+    DigiAyudh
+  </span>
+</NavLink>
           <button className="text-text-muted lg:hidden" onClick={onClose} aria-label="Close menu">
             <X className="h-5 w-5" />
           </button>
