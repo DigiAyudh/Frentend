@@ -4,12 +4,12 @@ import { Notification } from '../../types'
 
 export const fetchNotifications = createAsyncThunk(
   'notifications/fetchNotifications',
-  async (userId: string, { rejectWithValue }) => {
+  async (userId: string | undefined, { rejectWithValue }) => {
     try {
-      const response = await apiClient.getNotifications(userId)
-      return response.data.data
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message)
+      const response = await apiClient.getNotifications(userId ?? '')
+      return response.data.data as Notification[]
+    } catch (error) {
+      return rejectWithValue(apiClient.getErrorMessage(error))
     }
   }
 )
@@ -22,6 +22,18 @@ export const markAsRead = createAsyncThunk(
       return id
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message)
+    }
+  }
+)
+
+export const markAllAsRead = createAsyncThunk(
+  'notifications/markAllAsRead',
+  async (userId: string | undefined, { rejectWithValue }) => {
+    try {
+      await apiClient.markAllNotificationsRead(userId ?? '')
+      return true
+    } catch (error) {
+      return rejectWithValue(apiClient.getErrorMessage(error))
     }
   }
 )
@@ -72,6 +84,12 @@ const notificationsSlice = createSlice({
           notification.isRead = true
           state.unreadCount -= 1
         }
+      })
+      .addCase(markAllAsRead.fulfilled, (state) => {
+        state.notifications.forEach((n: Notification) => {
+          n.isRead = true
+        })
+        state.unreadCount = 0
       })
   },
 })

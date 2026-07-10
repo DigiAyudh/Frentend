@@ -33,6 +33,60 @@ export const clientSignup = createAsyncThunk(
   }
 )
 
+
+
+
+
+
+
+
+
+export const sendEmailOtp = createAsyncThunk(
+  "auth/sendEmailOtp",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.sendEmailOtp(email)
+      return response.data
+    } catch (error) {
+      return rejectWithValue(apiClient.getErrorMessage(error))
+    }
+  }
+)
+export const verifyEmailOtp = createAsyncThunk(
+  "auth/verifyEmailOtp",
+  async (
+    { email, otp }: { email: string; otp: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await apiClient.verifyEmailOtp(email, otp)
+      return response.data
+    } catch (error) {
+      return rejectWithValue(apiClient.getErrorMessage(error))
+    }
+  }
+)
+export const resendEmailOtp = createAsyncThunk(
+  "auth/resendEmailOtp",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.resendEmailOtp(email)
+      return response.data
+    } catch (error) {
+      return rejectWithValue(apiClient.getErrorMessage(error))
+    }
+  }
+)
+
+
+
+
+
+
+
+
+
+
 export const fetchCurrentUser = createAsyncThunk(
   'auth/fetchCurrentUser',
   async (_, { rejectWithValue }) => {

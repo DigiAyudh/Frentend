@@ -5,7 +5,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    allowedHosts: ['sb-5q9fjndakfyr.vercel.run', 'sb-k4eyphd6wfwx.vercel.run', 'localhost', '127.0.0.1'],
+    // Allow any Vercel preview subdomain (e.g. sb-xxxx.vercel.run) plus local dev.
+    // A leading dot makes Vite match all subdomains of that domain, so new
+    // preview hosts work automatically without editing this file again.
+    allowedHosts: ['.vercel.run', 'localhost', '127.0.0.1'],
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

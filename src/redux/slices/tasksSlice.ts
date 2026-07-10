@@ -4,10 +4,10 @@ import { Task } from '../../types'
 
 export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
-  async ({ company, projectId }: { company: string; projectId?: string }, { rejectWithValue }) => {
+  async (arg: { company?: string; projectId?: string } | undefined, { rejectWithValue }) => {
     try {
-      const response = await apiClient.getTasks(company, projectId)
-      return response.data.data
+      const response = await apiClient.getTasks(arg?.company ?? 'digiayudh', arg?.projectId)
+      return response.data.data as Task[]
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message)
     }

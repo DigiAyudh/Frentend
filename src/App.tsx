@@ -1,123 +1,153 @@
 import { Provider } from 'react-redux'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import { store } from './redux/store'
+import { ThemeProvider } from './lib/theme'
+import { useTheme } from '@/contexts/theme.context'
+import AuthInitializer from './components/AuthInitializer'
 import PrivateRoute from './components/PrivateRoute'
+import DashboardLayout from './layouts/DashboardLayout'
+
+// Public pages
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
-import AdminDashboard from './pages/AdminDashboard'
-import EmployeeDashboard from './pages/EmployeeDashboard'
-import ClientDashboard from './pages/ClientDashboard'
-import ProjectsPage from './pages/ProjectsPage'
-import TasksPage from './pages/TasksPage'
-import EmployeesPage from './pages/EmployeesPage'
-import LeadsPage from './pages/LeadsPage'
-import ChatPage from './pages/ChatPage'
-import ReportsPage from './pages/ReportsPage'
-import SettingsPage from './pages/SettingsPage'
+import PendingVerification from './pages/PendingVerification'
+import NotFound from './pages/NotFoundPage'
+
+// Admin pages
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminAnalytics from './pages/admin/AdminAnalytics'
+import EmployeesPage from './pages/admin/EmployeesPage'
+import AdminsPage from './pages/admin/AdminsPage'
+import ClientsPage from './pages/admin/ClientsPage'
+import VerificationPage from './pages/admin/VerificationPage'
+import ContactRequestsPage from './pages/admin/ContactRequestsPage'
+import AuditLogsPage from './pages/admin/AuditLogsPage'
+
+// Employee pages
+import EmployeeDashboard from './pages/employee/EmployeeDashboard'
+import LeadsPage from './pages/employee/LeadsPage'
+import AttendancePage from './pages/employee/AttendancePage'
+import MyClientsPage from './pages/employee/MyClientsPage'
+
+// Client pages
+import ClientDashboard from './pages/client/ClientDashboard'
+
+// Shared pages
+import ProjectsPage from './pages/shared/ProjectsPage'
+import ProjectDetail from './pages/shared/ProjectDetail'
+import TaskBoard from './pages/shared/TaskBoard'
+import MeetingsPage from './pages/shared/MeetingsPage'
+import InvoicesPage from './pages/shared/InvoicesPage'
+import DocumentsPage from './pages/shared/DocumentsPage'
+import SupportPage from './pages/shared/SupportPage'
+import MessagesPage from './pages/shared/MessagesPage'
+import ProfilePage from './pages/shared/ProfilePage'
+import SettingsPage from './pages/shared/SettingsPage'
+import NotificationsPage from './pages/shared/NotificationsPage'
 
 function App() {
   return (
     <Provider store={store}>
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+      <ThemeProvider>
+        <AuthInitializer>
+          <Router>
+            <Routes>
+              {/* Public */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/pending-verification" element={<PendingVerification />} />
 
-          {/* Admin routes */}
-          <Route
-            path="/admin/dashboard"
-            element={
-              <PrivateRoute requiredRole="admin">
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
+              {/* Admin Dashboard */}
+              <Route
+                path="/admin"
+                element={
+                  <PrivateRoute requiredRole="admin">
+                    <DashboardLayout role="admin" />
+                  </PrivateRoute>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="employees" element={<EmployeesPage />} />
+                <Route path="admins" element={<AdminsPage />} />
+                <Route path="clients" element={<ClientsPage />} />
+                <Route path="verification" element={<VerificationPage />} />
+                <Route path="projects" element={<ProjectsPage basePath="/admin/projects" />} />
+                <Route path="projects/:id" element={<ProjectDetail />} />
+                <Route path="contact-requests" element={<ContactRequestsPage />} />
+                <Route path="invoices" element={<InvoicesPage />} />
+                <Route path="audit-logs" element={<AuditLogsPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
 
-          {/* Employee routes */}
-          <Route
-            path="/employee/dashboard"
-            element={
-              <PrivateRoute requiredRole="employee">
-                <EmployeeDashboard />
-              </PrivateRoute>
-            }
-          />
+              {/* Employee Dashboard */}
+              <Route
+                path="/employee"
+                element={
+                  <PrivateRoute requiredRole="employee">
+                    <DashboardLayout role="employee" />
+                  </PrivateRoute>
+                }
+              >
+                <Route index element={<EmployeeDashboard />} />
+                <Route path="projects" element={<ProjectsPage basePath="/employee/projects" />} />
+                <Route path="projects/:id" element={<ProjectDetail />} />
+                <Route path="tasks" element={<TaskBoard />} />
+                <Route path="my-tasks" element={<TaskBoard />} />
+                <Route path="clients" element={<MyClientsPage />} />
+                <Route path="leads" element={<LeadsPage />} />
+                <Route path="calendar" element={<MeetingsPage />} />
+                <Route path="messages" element={<MessagesPage />} />
+                <Route path="attendance" element={<AttendancePage />} />
+                <Route path="documents" element={<DocumentsPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
 
-          {/* Client routes */}
-          <Route
-            path="/client/dashboard"
-            element={
-              <PrivateRoute requiredRole="client">
-                <ClientDashboard />
-              </PrivateRoute>
-            }
-          />
+              {/* Client Dashboard */}
+              <Route
+                path="/client"
+                element={
+                  <PrivateRoute requiredRole="client">
+                    <DashboardLayout role="client" />
+                  </PrivateRoute>
+                }
+              >
+                <Route index element={<ClientDashboard />} />
+                <Route path="projects" element={<ProjectsPage basePath="/client/projects" />} />
+                <Route path="projects/:id" element={<ProjectDetail />} />
+                <Route path="invoices" element={<InvoicesPage />} />
+                <Route path="documents" element={<DocumentsPage />} />
+                <Route path="meetings" element={<MeetingsPage />} />
+                <Route path="support" element={<SupportPage />} />
+                <Route path="messages" element={<MessagesPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
 
-          {/* Common routes */}
-          <Route
-            path="/projects"
-            element={
-              <PrivateRoute>
-                <ProjectsPage />
-              </PrivateRoute>
-            }
+              {/* Catch-all */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'hsl(var(--surface))',
+                color: 'hsl(var(--text))',
+                border: '1px solid hsl(var(--border))',
+              },
+            }}
           />
-          <Route
-            path="/tasks"
-            element={
-              <PrivateRoute>
-                <TasksPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/employees"
-            element={
-              <PrivateRoute requiredRole="admin">
-                <EmployeesPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/leads"
-            element={
-              <PrivateRoute requiredRole="admin">
-                <LeadsPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/chat"
-            element={
-              <PrivateRoute>
-                <ChatPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <PrivateRoute requiredRole="admin">
-                <ReportsPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <PrivateRoute>
-                <SettingsPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Router>
+        </AuthInitializer>
+      </ThemeProvider>
     </Provider>
   )
 }

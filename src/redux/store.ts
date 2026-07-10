@@ -6,6 +6,12 @@ import employeesReducer from './slices/employeesSlice'
 import leadsReducer from './slices/leadsSlice'
 import chatsReducer from './slices/chatsSlice'
 import notificationsReducer from './slices/notificationsSlice'
+import clientsReducer from './slices/clientsSlice'
+import contactReducer from './slices/contactSlice'
+import dashboardReducer from './slices/dashboardSlice'
+import businessReducer from './slices/businessSlice'
+import supportReducer from './slices/supportSlice'
+import settingsReducer from './slices/settingsSlice'
 
 export const store = configureStore({
   reducer: {
@@ -16,7 +22,17 @@ export const store = configureStore({
     leads: leadsReducer,
     chats: chatsReducer,
     notifications: notificationsReducer,
+    clients: clientsReducer,
+    contact: contactReducer,
+    dashboard: dashboardReducer,
+    business: businessReducer,
+    support: supportReducer,
+    settings: settingsReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 })
 
 export type RootState = ReturnType<typeof store.getState>

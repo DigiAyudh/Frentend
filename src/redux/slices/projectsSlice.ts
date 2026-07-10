@@ -4,10 +4,10 @@ import { Project } from '../../types'
 
 export const fetchProjects = createAsyncThunk(
   'projects/fetchProjects',
-  async (company: string, { rejectWithValue }) => {
+  async (company: string | undefined, { rejectWithValue }) => {
     try {
-      const response = await apiClient.getProjects(company)
-      return response.data.data
+      const response = await apiClient.getProjects(company ?? 'digiayudh')
+      return response.data.data as Project[]
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message)
     }

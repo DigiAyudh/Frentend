@@ -4,10 +4,10 @@ import { Lead } from '../../types'
 
 export const fetchLeads = createAsyncThunk(
   'leads/fetchLeads',
-  async (company: string, { rejectWithValue }) => {
+  async (company: string | undefined, { rejectWithValue }) => {
     try {
-      const response = await apiClient.getLeads(company)
-      return response.data.data
+      const response = await apiClient.getLeads(company ?? 'digiayudh')
+      return response.data.data as Lead[]
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message)
     }

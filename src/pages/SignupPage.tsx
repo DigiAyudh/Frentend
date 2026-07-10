@@ -1,201 +1,264 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { clientSignup } from '../redux/slices/authSlice'
-import { Mail, Lock, User, Loader, Building2, Phone } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 
-export default function SignupPage() {
-  const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const { loading, error } = useAppSelector((state) => state.auth)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    companyName: '',
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import toast from 'react-hot-toast'
+import { Eye, EyeOff } from 'lucide-react'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
+// import { clientSignup } from '../../../redux/slices/authSlice'
+import { sendEmailOtp } from '@/redux/slices/authSlice'
+
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { CardHeader } from '@/components/ui/card'
+import { CardTitle } from '@/components/ui/card'
+import { CardDescription } from '@/components/ui/card'
+
+import 'react-phone-input-2/lib/style.css'
+import { useForm, Controller } from 'react-hook-form'
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
+
+
+
+
+const schema = z
+  .object({
+    name: z.string().min(2, 'Full name is required'),
+    companyName: z.string().min(2, 'Company name is required'),
+    email: z.string().email('Enter a valid email'),
+    countryCode: z.string().min(1, 'Required'),
+    phone: z.string().min(6, 'Enter a valid phone number'),
+    companyType: z.string().min(1, 'Select a company type'),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    country: z.string().min(1, 'Country is required'),
+    password: z.string().min(6, 'Minimum 6 characters'),
+    confirmPassword: z.string(),
+    termsAccepted: z.boolean().refine((v) => v === true, {
+      message: 'You must accept the terms',
+    }),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+type FormValues = z.infer<typeof schema>
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+const companyTypes = ['Startup', 'SMB', 'Enterprise', 'Agency', 'Non-profit', 'Other']
 
-  const result = await dispatch(clientSignup(formData))
-
-  if (clientSignup.fulfilled.match(result)) {
-    navigate('/client/dashboard')
-  }
+function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      {children}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  )
 }
 
+export default function SignupPage() {
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const { loading } = useAppSelector((s) => s.auth)
+  const [showPassword, setShowPassword] = useState(false)
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      countryCode: '+91',
+      phone: '',
+      country: 'India',
+    },
+  })
+
+  // const onSubmit = async (values: FormValues) => {
+  //   const result = await dispatch(clientSignup(values))
+  //   if (clientSignup.fulfilled.match(result)) {
+  //     toast.success('Account created! Your account is pending verification.')
+  //     navigate('/client')
+  //   } else {
+  //     toast.error((result.payload as string) || 'Signup failed')
+  //   }
+  // }
+
+  const onSubmit = async (values: FormValues) => {
+    const result = await dispatch(sendEmailOtp(values.email))
+
+    if (sendEmailOtp.fulfilled.match(result)) {
+      toast.success('Verification code sent to your email.')
+
+      navigate('/verify-email', {
+        state: {
+          email: values.email,
+          signupData: values,
+        },
+      })
+    } else {
+      toast.error((result.payload as string) || 'Failed to send OTP')
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <img src="/digiayudh-logo.jpeg" alt="DigiAyudh" className="h-12 w-12 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-text">Create Account</h1>
-          <p className="text-text-light mt-2">Join DigiAyudh today</p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-text mb-2">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 text-text-light" size={20} />
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="John Doe"
-                required
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
+    <div className="mx-auto max-w-md px-6 py-12">
+      <div className="mb-8 text-center">
+        <Link to="/" className="inline-flex items-center gap-2">
+          <div className="flex size-8 items-center justify-center rounded-lg">
+            <img
+              src="/digiayudh-logo.jpeg"
+              alt="DigiAyudh Logo"
+              className="h-8 w-8 rounded-lg object-cover"
+            />
           </div>
+        </Link>
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Welcome to DigiAyudh</CardTitle>
+          <CardDescription>Sign up to access your portal</CardDescription>
+        </CardHeader>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-text mb-2">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 text-text-light" size={20} />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
 
-          {/* Phone Number */}
-          <div>
-            <label className="block text-sm font-medium text-text mb-2">Phone Number</label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-3 text-text-light" size={20} />
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="123-456-7890"
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          {/* Company Name */}
-          <div>
-            <label className="block text-sm font-medium text-text mb-2">Company Name</label>
-            <div className="relative">
-              <Building2 className="absolute left-3 top-3 text-text-light" size={20} />
-              <input
-                type="text"
-                name="companyName"
-                value={formData.companyName}
-                onChange={handleChange}
-                placeholder="Your Company"
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-text mb-2">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 text-text-light" size={20} />
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          {/* Company Name */}
-          <div>
-            <label className="block text-sm font-medium text-text mb-2">Company Name</label>
-            <div className="relative">
-              <Building2 className="absolute left-3 top-3 text-text-light" size={20} />
-              <input
-                type="text"
-                name="companyName"
-                value={formData.companyName}
-                onChange={handleChange}
-                placeholder="Your Company"
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          {/* Role */}
-          {/* <div>
-            <label className="block text-sm font-medium text-text mb-2">Role</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="admin">Admin</option>
-              <option value="employee">Employee</option>
-              <option value="client">Client</option>
-            </select>
-          </div> */}
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
-          >
-            {loading ? (
-              <>
-                <Loader size={20} className="animate-spin" />
-                Creating account...
-              </>
-            ) : (
-              'Sign Up'
-            )}
-          </button>
-        </form>
-
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-text-light">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary hover:text-primary-dark font-medium">
-              Sign in
-            </Link>
-          </p>
-        </div>
-
-        {/* Back to home */}
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-text-light hover:text-text text-sm">
-            ← Back to home
-          </Link>
-        </div>
       </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Full name" error={errors.name?.message}>
+            <Input placeholder="Jane Doe" {...register('name')} />
+          </Field>
+          <Field label="Company name" error={errors.companyName?.message}>
+            <Input placeholder="Acme Inc." {...register('companyName')} />
+          </Field>
+        </div>
+
+        <Field label="Work email" error={errors.email?.message}>
+          <Input type="email" placeholder="you@company.com" {...register('email')} />
+        </Field>
+
+        <Field label="Phone Number" error={errors.phone?.message}>
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field }) => (
+              <PhoneInput
+                country="in"
+                enableSearch
+                value={field.value}
+                onChange={(value, country) => {
+                  field.onChange(value)
+
+                  if (country && typeof country !== 'string') {
+                    setValue('countryCode', `+${country.dialCode}`)
+                  }
+                }}
+                inputStyle={{
+                  width: '100%',
+                  height: '46px',
+                  background: '#0F172A',
+                  color: '#fff',
+                  border: '1px solid #334155',
+                  borderRadius: '12px',
+                  paddingLeft: '52px',
+                  fontSize: '14px',
+                }}
+                buttonStyle={{
+                  background: '#0F172A',
+                  border: '1px solid #334155',
+                  borderRadius: '12px 0 0 12px',
+                }}
+                dropdownStyle={{
+                  background: '#0F172A',
+                  color: '#fff',
+                  border: '1px solid #334155',
+                  maxHeight: '300px',
+                }}
+                searchStyle={{
+                  background: '#1E293B',
+                  color: '#fff',
+                }}
+              />
+            )}
+          />
+        </Field>
+
+        <input type="hidden" {...register('countryCode')} />
+
+        <Field label="Company type" error={errors.companyType?.message}>
+          <select
+            className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            defaultValue=""
+            {...register('companyType')}
+          >
+            <option value="" disabled>
+              Select type
+            </option>
+            {companyTypes.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="City" error={errors.city?.message}>
+            <Input placeholder="Indor" {...register('city')} />
+          </Field>
+          <Field label="State" error={errors.state?.message}>
+            <Input placeholder="MP" {...register('state')} />
+          </Field>
+          <Field label="Country" error={errors.country?.message}>
+            <Input placeholder="India" {...register('country')} />
+          </Field>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Password" error={errors.password?.message}>
+            <div className="relative">
+              <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...register('password')} />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-foreground"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </Field>
+          <Field label="Confirm password" error={errors.confirmPassword?.message}>
+            <Input type="password" placeholder="••••••••" {...register('confirmPassword')} />
+          </Field>
+        </div>
+
+        <label className="flex items-start gap-2 text-sm text-text-muted">
+          <input type="checkbox" className="mt-1 h-4 w-4 rounded border-border" {...register('termsAccepted')} />
+          <span>
+            I agree to the{' '}
+            <span className="text-primary">Terms of Service</span> and{' '}
+            <span className="text-primary">Privacy Policy</span>.
+          </span>
+        </label>
+        {errors.termsAccepted && <p className="text-xs text-destructive">{errors.termsAccepted.message}</p>}
+
+        <Button type="submit" className="w-full" Loading={loading}>
+          Create Account
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-text-muted">
+        Already have an account?{' '}
+        <Link to="/login" className="font-medium text-primary hover:underline">
+          Sign in
+        </Link>
+      </p>
     </div>
+
   )
 }
