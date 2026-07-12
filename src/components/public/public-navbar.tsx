@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { logout } from '@/redux/slices/authSlice';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { APP_CONFIG } from '../../config/navigation';
@@ -11,6 +13,28 @@ import { cn } from '@/lib/utils';
 export function PublicNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+
+  const getDashboardPath = () => {
+    if (!user) return '/login';
+    switch (user.role) {
+      case 'admin':
+        return '/admin';
+      case 'employee':
+        return '/employee';
+      case 'client':
+        return '/client';
+      default:
+        return '/login';
+    }
+  };
+
+  const handleLogout = async () => {
+    await dispatch(logout());
+    navigate('/');
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -53,9 +77,21 @@ export function PublicNavbar() {
 
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle />
-          <Button variant="brand" asChild>
-            <Link to="/login">Get Started</Link>
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <span className="text-sm text-muted-foreground">{user?.name}</span>
+              <Button variant="brand" asChild>
+                <Link to={getDashboardPath()}>Dashboard</Link>
+              </Button>
+              <Button variant="outline" size="icon" onClick={handleLogout} title="Logout">
+                <LogOut className="size-4" />
+              </Button>
+            </>
+          ) : (
+            <Button variant="brand" asChild>
+              <Link to="/login">Get Started</Link>
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
@@ -85,11 +121,35 @@ export function PublicNavbar() {
                   {link.label}
                 </a>
               ))}
-              <Button variant="brand" className="mt-2" asChild>
-                <Link to="/login" onClick={() => setMobileOpen(false)}>
-                  Get Started
-                </Link>
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <div className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground">
+                    {user?.name}
+                  </div>
+                  <Button variant="brand" className="mt-2" asChild>
+                    <Link to={getDashboardPath()} onClick={() => setMobileOpen(false)}>
+                      Dashboard
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="mt-2 w-full"
+                    onClick={() => {
+                      handleLogout();
+                      setMobileOpen(false);
+                    }}
+                  >
+                    <LogOut className="mr-2 size-4" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <Button variant="brand" className="mt-2" asChild>
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>
+                    Get Started
+                  </Link>
+                </Button>
+              )}
             </nav>
           </motion.div>
         )}

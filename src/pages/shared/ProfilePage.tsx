@@ -1,5 +1,7 @@
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
+import { Upload, X, ExternalLink, Copy, Check, Award } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import { setUser } from '../../redux/slices/authSlice'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -7,10 +9,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/ca
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Textarea } from '../../components/ui/textarea'
+import { Badge } from '../../components/ui/badge'
 import { FormField } from '../../components/common/FormField'
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar'
 import { StatusBadge } from '../../components/common/StatusBadge'
 import { getInitials } from '../../utils/helpers'
+import { formatDate } from '../../lib/utils'
 
 interface FormValues {
   name: string
@@ -21,9 +25,40 @@ interface FormValues {
   bio: string
 }
 
+interface Certificate {
+  _id: string
+  title: string
+  issueDate: string
+  expiryDate?: string
+  verificationUrl: string
+  issuedBy: string
+}
+
 export default function ProfilePage() {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((s) => s.auth)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [previewImage, setPreviewImage] = useState<string | null>(user?.profileImage || null)
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const isClient = user?.role === 'client'
+  const [employeeCertificates, setEmployeeCertificates] = useState<Certificate[]>([
+    {
+      _id: 'emp_cert_1',
+      title: 'AWS Solutions Architect',
+      issueDate: '2024-01-15',
+      expiryDate: '2025-01-15',
+      verificationUrl: `${window.location.origin}/verify/cert/verify_token_emp_1`,
+      issuedBy: 'admin@company.com',
+    },
+    {
+      _id: 'emp_cert_2',
+      title: 'React Advanced Patterns',
+      issueDate: '2023-06-20',
+      verificationUrl: `${window.location.origin}/verify/cert/verify_token_emp_2`,
+      issuedBy: 'admin@company.com',
+    },
+  ])
 
   const { register, handleSubmit, formState: { isDirty } } = useForm<FormValues>({
     defaultValues: {
@@ -35,6 +70,62 @@ export default function ProfilePage() {
       bio: user?.bio || '',
     },
   })
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB')
+      return
+    }
+
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('Only JPG, PNG, and WebP files are allowed')
+      return
+    }
+
+    setIsUploadingPhoto(true)
+    try {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const result = reader.result as string
+        setPreviewImage(result)
+        
+        // In a real app, you would upload to a server/storage service
+        // For now, we'll store in local state and update user
+        if (user) {
+          dispatch(setUser({ ...user, profileImage: result }))
+          toast.success('Profile photo updated successfully')
+        }
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      toast.error('Failed to upload photo')
+    } finally {
+      setIsUploadingPhoto(false)
+    }
+  }
+
+  const handleRemovePhoto = () => {
+    setPreviewImage(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    if (user) {
+      dispatch(setUser({ ...user, profileImage: undefined }))
+      toast.success('Profile photo removed')
+    }
+  }
+
+  const handleCopyCertLink = (certId: string, url: string) => {
+    navigator.clipboard.writeText(url)
+    setCopiedId(certId)
+    toast.success('Verification link copied to clipboard')
+    setTimeout(() => setCopiedId(null), 2000)
+  }
 
   const onSubmit = (values: FormValues) => {
     if (user) {
@@ -50,10 +141,39 @@ export default function ProfilePage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={user?.profileImage} alt={user?.name} />
-              <AvatarFallback className="text-2xl">{getInitials(user?.name || 'U')}</AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={previewImage || user?.profileImage} alt={user?.name} />
+                <AvatarFallback className="text-2xl">{getInitials(user?.name || 'U')}</AvatarFallback>
+              </Avatar>
+              {previewImage && (
+                <button
+                  onClick={handleRemovePhoto}
+                  className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-white hover:bg-destructive/90"
+                  title="Remove photo"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingPhoto}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              {isUploadingPhoto ? 'Uploading...' : 'Upload Photo'}
+            </Button>
+            <p className="text-xs text-text-light">Max 5MB • JPG, PNG, WebP</p>
             <div>
               <h3 className="text-lg font-semibold">{user?.name}</h3>
               <p className="text-sm text-text-light">{user?.email}</p>
@@ -84,6 +204,65 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Certificates Section - Only visible to employees and admins */}
+      {!isClient && employeeCertificates.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Award className="h-5 w-5" />Certificates & Credentials</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {employeeCertificates.map((cert) => {
+                const isExpired = cert.expiryDate && new Date(cert.expiryDate) < new Date()
+                return (
+                  <Card key={cert._id} className="border">
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-1">
+                          <h4 className="font-semibold text-sm">{cert.title}</h4>
+                          <p className="text-xs text-text-light">Issued: {formatDate(cert.issueDate)}</p>
+                        </div>
+                        {isExpired && (
+                          <Badge variant="destructive" className="whitespace-nowrap">Expired</Badge>
+                        )}
+                      </div>
+                      {cert.expiryDate && (
+                        <p className={`text-xs ${isExpired ? 'text-destructive' : 'text-text-light'}`}>
+                          Expires: {formatDate(cert.expiryDate)}
+                        </p>
+                      )}
+                      <p className="text-xs text-text-light">Issued by: {cert.issuedBy}</p>
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 gap-2"
+                          onClick={() => window.open(cert.verificationUrl, '_blank')}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          View
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopyCertLink(cert._id, cert.verificationUrl)}
+                        >
+                          {copiedId === cert._id ? (
+                            <Check className="h-3 w-3" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

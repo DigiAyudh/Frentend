@@ -147,6 +147,54 @@ export const mockApi = {
     return delay({ token: makeToken(user._id), refreshToken: makeToken(user._id) + ".refresh" })
   },
 
+  requestPasswordReset(email: string) {
+    const user = db.users.find((u) => u.email.toLowerCase() === email.toLowerCase())
+    if (!user) {
+      // Don't reveal if email exists - security best practice
+      return delay({ success: true, message: "If this email exists, a reset link has been sent." })
+    }
+    // Store reset token in mock storage (in real app, this would be sent via email)
+    const resetToken = `reset_${user._id}_${Date.now()}`
+    db.resetTokens = db.resetTokens || []
+    db.resetTokens.push({ token: resetToken, userId: user._id, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) })
+    log("requested password reset", "Auth", user._id)
+    return delay({ success: true, message: "Password reset link sent to your email" })
+  },
+
+  verifyPasswordResetToken(token: string) {
+    const db_with_tokens = db as any
+    if (!db_with_tokens.resetTokens) {
+      return fail("Invalid or expired reset token", 400)
+    }
+    const resetToken = db_with_tokens.resetTokens.find((t: any) => t.token === token && t.expiresAt > new Date())
+    if (!resetToken) {
+      return fail("Invalid or expired reset token", 400)
+    }
+    return delay({ success: true, message: "Token is valid" })
+  },
+
+  resetPassword(token: string, password: string) {
+    const db_with_tokens = db as any
+    if (!db_with_tokens.resetTokens) {
+      return fail("Invalid or expired reset token", 400)
+    }
+    const resetTokenIndex = db_with_tokens.resetTokens.findIndex((t: any) => t.token === token && t.expiresAt > new Date())
+    if (resetTokenIndex === -1) {
+      return fail("Invalid or expired reset token", 400)
+    }
+    const resetToken = db_with_tokens.resetTokens[resetTokenIndex]
+    const user = db.users.find((u) => u._id === resetToken.userId)
+    if (!user) {
+      return fail("User not found", 404)
+    }
+    // Update password
+    db.credentials[user.email.toLowerCase()] = password
+    // Remove used token
+    db_with_tokens.resetTokens.splice(resetTokenIndex, 1)
+    log("reset password", "Auth", user._id)
+    return delay({ success: true, message: "Password reset successfully" })
+  },
+
   sendOtp() {
     return delay({ success: true, message: "OTP sent (use 123456 in demo mode)" })
   },
@@ -460,7 +508,22 @@ export const mockApi = {
       status: "scheduled", createdAt: now,
     }
     db.meetings.unshift(meeting)
+    log("created", "Meeting", meeting._id, data.title)
     return delay({ success: true, data: meeting })
+  },
+  updateMeeting(id: string, data: Record<string, unknown>) {
+    const m = db.meetings.find((x) => x._id === id)
+    if (!m) return fail("Meeting not found", 404)
+    Object.assign(m, data)
+    log("updated", "Meeting", id)
+    return delay({ success: true, data: m })
+  },
+  deleteMeeting(id: string) {
+    const idx = db.meetings.findIndex((x) => x._id === id)
+    if (idx === -1) return fail("Meeting not found", 404)
+    const [removed] = db.meetings.splice(idx, 1)
+    log("deleted", "Meeting", id, removed.title)
+    return delay({ success: true })
   },
 
   /* ---- Documents ---- */
@@ -544,6 +607,76 @@ export const mockApi = {
       ]
     }
     return delay({ success: true, data: stats })
+  },
+
+  // Attendance
+  getAttendance() {
+    return delay({ success: true, data: db.attendance || [] })
+  },
+  markAttendance(data: any) {
+    if (!db.attendance) db.attendance = []
+    const existing = db.attendance.find((a: any) => a.employeeId === data.employeeId && a.date === data.date)
+    if (existing) {
+      Object.assign(existing, data)
+      return delay({ success: true, data: existing })
+    }
+    const newAttendance = { _id: db.uid("att"), ...data }
+    db.attendance.push(newAttendance)
+    return delay({ success: true, data: newAttendance })
+  },
+
+  // Leave Requests
+  getLeaveRequests(company: string) {
+    return delay({ success: true, data: db.leaveRequests || [] })
+  },
+  createLeaveRequest(data: any) {
+    if (!db.leaveRequests) db.leaveRequests = []
+    const newLeave = { _id: db.uid("leave"), ...data }
+    db.leaveRequests.push(newLeave)
+    return delay({ success: true, data: newLeave })
+  },
+  approveLeaveRequest(id: string, approvedBy: string) {
+    if (!db.leaveRequests) return fail("Leave request not found", 404)
+    const leave = db.leaveRequests.find((l: any) => l._id === id)
+    if (!leave) return fail("Leave request not found", 404)
+    leave.status = "approved"
+    leave.approvedBy = approvedBy
+    return delay({ success: true, data: leave })
+  },
+  rejectLeaveRequest(id: string, reason: string) {
+    if (!db.leaveRequests) return fail("Leave request not found", 404)
+    const leave = db.leaveRequests.find((l: any) => l._id === id)
+    if (!leave) return fail("Leave request not found", 404)
+    leave.status = "rejected"
+    leave.rejectionReason = reason
+    return delay({ success: true, data: leave })
+  },
+
+  // To-Do Lists
+  getToDos(employeeId: string) {
+    if (!db.todos) db.todos = []
+    const todos = db.todos.filter((t: any) => t.employeeId === employeeId)
+    return delay({ success: true, data: todos })
+  },
+  createToDo(data: any) {
+    if (!db.todos) db.todos = []
+    const newTodo = { _id: db.uid("todo"), ...data, createdAt: new Date(), updatedAt: new Date() }
+    db.todos.push(newTodo)
+    return delay({ success: true, data: newTodo })
+  },
+  updateToDo(id: string, data: any) {
+    if (!db.todos) return fail("To-Do not found", 404)
+    const todo = db.todos.find((t: any) => t._id === id)
+    if (!todo) return fail("To-Do not found", 404)
+    Object.assign(todo, { ...data, updatedAt: new Date() })
+    return delay({ success: true, data: todo })
+  },
+  deleteToDo(id: string) {
+    if (!db.todos) return fail("To-Do not found", 404)
+    const idx = db.todos.findIndex((t: any) => t._id === id)
+    if (idx === -1) return fail("To-Do not found", 404)
+    db.todos.splice(idx, 1)
+    return delay({ success: true })
   },
 }
 

@@ -43,11 +43,20 @@ Test the application with these demo credentials:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@digiayudh.com | Admin@123 |
-| Employee | employee@digiayudh.com | Employee@123 |
-| Client | client@digiayudh.com | Client@123 |
+| Admin | admin@digiayudh.com | admin123 |
+| Employee | employee@digiayudh.com | emp123 |
+| Client | client@acme.com | client123 |
 
 **Note**: Demo accounts work when `VITE_API_URL` is not configured (mock mode).
+
+### Session Persistence
+
+- User sessions automatically persist across page refreshes
+- Authentication token stored in localStorage
+- Session restored automatically on app load
+- Login redirects to role-specific dashboard
+- "Dashboard" button appears in navbar when logged in
+- One-click logout clears session completely
 
 ---
 

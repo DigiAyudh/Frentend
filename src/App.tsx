@@ -13,6 +13,9 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
 import PendingVerification from './pages/PendingVerification'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+import PublicCertificateVerification from './pages/PublicCertificateVerification'
 import NotFound from './pages/NotFoundPage'
 
 // Admin pages
@@ -24,12 +27,19 @@ import ClientsPage from './pages/admin/ClientsPage'
 import VerificationPage from './pages/admin/VerificationPage'
 import ContactRequestsPage from './pages/admin/ContactRequestsPage'
 import AuditLogsPage from './pages/admin/AuditLogsPage'
+import AdminMeetingsPage from './pages/admin/AdminMeetingsPage'
+import AdminTasksPage from './pages/admin/AdminTasksPage'
+import AdminAttendancePage from './pages/admin/AttendancePage'
+import AdminLeaveRequestsPage from './pages/admin/LeaveRequestsPage'
+import CertificatesPage from './pages/admin/CertificatesPage'
+import InternalDocumentationPage from './pages/shared/InternalDocumentationPage'
 
 // Employee pages
 import EmployeeDashboard from './pages/employee/EmployeeDashboard'
 import LeadsPage from './pages/employee/LeadsPage'
 import AttendancePage from './pages/employee/AttendancePage'
 import MyClientsPage from './pages/employee/MyClientsPage'
+import MyTasksPage from './pages/employee/MyTasksPage'
 
 // Client pages
 import ClientDashboard from './pages/client/ClientDashboard'
@@ -60,6 +70,9 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/pending-verification" element={<PendingVerification />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/verify/cert/:token" element={<PublicCertificateVerification />} />
 
               {/* Admin Dashboard */}
               <Route
@@ -78,9 +91,17 @@ function App() {
                 <Route path="verification" element={<VerificationPage />} />
                 <Route path="projects" element={<ProjectsPage basePath="/admin/projects" />} />
                 <Route path="projects/:id" element={<ProjectDetail />} />
+                <Route path="tasks" element={<AdminTasksPage />} />
+                <Route path="attendance" element={<AdminAttendancePage />} />
+                <Route path="leave-requests" element={<AdminLeaveRequestsPage />} />
                 <Route path="contact-requests" element={<ContactRequestsPage />} />
                 <Route path="invoices" element={<InvoicesPage />} />
                 <Route path="audit-logs" element={<AuditLogsPage />} />
+                <Route path="certificates" element={<CertificatesPage />} />
+                <Route path="documents" element={<DocumentsPage />} />
+                <Route path="internal-docs" element={<InternalDocumentationPage />} />
+                <Route path="messages" element={<MessagesPage />} />
+                <Route path="meetings" element={<AdminMeetingsPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
@@ -99,13 +120,14 @@ function App() {
                 <Route path="projects" element={<ProjectsPage basePath="/employee/projects" />} />
                 <Route path="projects/:id" element={<ProjectDetail />} />
                 <Route path="tasks" element={<TaskBoard />} />
-                <Route path="my-tasks" element={<TaskBoard />} />
+                <Route path="my-tasks" element={<MyTasksPage />} />
                 <Route path="clients" element={<MyClientsPage />} />
                 <Route path="leads" element={<LeadsPage />} />
                 <Route path="calendar" element={<MeetingsPage />} />
                 <Route path="messages" element={<MessagesPage />} />
                 <Route path="attendance" element={<AttendancePage />} />
                 <Route path="documents" element={<DocumentsPage />} />
+                <Route path="internal-docs" element={<InternalDocumentationPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />

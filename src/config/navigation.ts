@@ -20,6 +20,8 @@ import {
   User,
   Bell,
   KanbanSquare,
+  Calendar,
+  CheckCircle,
 } from 'lucide-react'
 import type { UserRole } from '../types'
 
@@ -51,6 +53,9 @@ const adminNav: NavSection[] = [
       { label: 'Clients', to: '/admin/clients', icon: UserCheck },
       { label: 'Verification', to: '/admin/verification', icon: ShieldCheck, badgeKey: 'pendingClients' },
       { label: 'Projects', to: '/admin/projects', icon: FolderKanban },
+      { label: 'Tasks', to: '/admin/tasks', icon: ListChecks },
+      { label: 'Attendance', to: '/admin/attendance', icon: Calendar },
+      { label: 'Leave Requests', to: '/admin/leave-requests', icon: CheckCircle },
     ],
   },
   {
@@ -59,6 +64,13 @@ const adminNav: NavSection[] = [
       { label: 'Contact Requests', to: '/admin/contact-requests', icon: Inbox, badgeKey: 'contactRequests' },
       { label: 'Invoices', to: '/admin/invoices', icon: Receipt },
       { label: 'Audit Logs', to: '/admin/audit-logs', icon: ClipboardList },
+    ],
+  },
+  {
+    title: 'Collaboration',
+    items: [
+      { label: 'Messages', to: '/admin/messages', icon: MessageSquare },
+      { label: 'Meetings', to: '/admin/meetings', icon: CalendarDays },
     ],
   },
   {

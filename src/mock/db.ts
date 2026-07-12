@@ -36,6 +36,9 @@ export const credentials: Record<string, string> = {
   "rejected@oldco.com": "reject123",
 }
 
+/* Password reset tokens for mock auth ----------------------------------- */
+export const resetTokens: Array<{ token: string; userId: string; expiresAt: Date }> = []
+
 /* Users -------------------------------------------------------------- */
 export const users: User[] = [
   {
@@ -412,7 +415,7 @@ export const auditLogs: AuditLog[] = [
 ]
 
 /* Attendance --------------------------------------------------------- */
-export const attendance: Attendance[] = Array.from({ length: 10 }).map((_, i) => ({
+export let attendance: Attendance[] = Array.from({ length: 10 }).map((_, i) => ({
   _id: `at_${i + 1}`,
   employeeId: "u_emp_1",
   employeeName: "James Wilson",
@@ -422,3 +425,40 @@ export const attendance: Attendance[] = Array.from({ length: 10 }).map((_, i) =>
   status: (i % 7 === 0 ? "remote" : i % 5 === 0 ? "late" : "present") as Attendance["status"],
   hours: 8,
 }))
+
+/* Leave Requests ----------------------------------------------------- */
+export let leaveRequests: Array<{
+  _id: string
+  employeeId: string
+  employeeName: string
+  startDate: string
+  endDate: string
+  reason: string
+  leaveType: 'sick' | 'personal' | 'vacation' | 'other'
+  status: 'pending' | 'approved' | 'rejected'
+  createdAt: string
+  approvedBy?: string
+  rejectionReason?: string
+}> = [
+  { _id: "leave_1", employeeId: "u_emp_1", employeeName: "James Wilson", startDate: daysFromNow(7).toISOString().split('T')[0], endDate: daysFromNow(9).toISOString().split('T')[0], leaveType: "vacation", reason: "Summer vacation", status: "pending", createdAt: daysAgo(3).toISOString() },
+  { _id: "leave_2", employeeId: "u_emp_2", employeeName: "James Dev", startDate: daysFromNow(14).toISOString().split('T')[0], endDate: daysFromNow(14).toISOString().split('T')[0], leaveType: "sick", reason: "Medical appointment", status: "approved", createdAt: daysAgo(5).toISOString(), approvedBy: "u_admin_1" },
+]
+
+/* To-Do Lists -------------------------------------------------------- */
+export let todos: Array<{
+  _id: string
+  taskId: string
+  employeeId: string
+  title: string
+  description?: string
+  completed: boolean
+  priority: 'low' | 'medium' | 'high'
+  dueDate?: Date
+  createdAt: Date
+  updatedAt: Date
+}> = [
+  { _id: "todo_1", taskId: "t_1", employeeId: "u_emp_1", title: "Complete project documentation", description: "Write comprehensive docs for API", completed: false, priority: "high", dueDate: daysFromNow(2), createdAt: daysAgo(1), updatedAt: daysAgo(1) },
+  { _id: "todo_2", taskId: "t_1", employeeId: "u_emp_1", title: "Review pull request from John", completed: false, priority: "medium", dueDate: daysFromNow(1), createdAt: daysAgo(2), updatedAt: daysAgo(1) },
+  { _id: "todo_3", taskId: "t_2", employeeId: "u_emp_1", title: "Update database schema", completed: true, priority: "high", dueDate: daysAgo(1), createdAt: daysAgo(5), updatedAt: daysAgo(1) },
+  { _id: "todo_4", taskId: "t_3", employeeId: "u_emp_2", title: "Design UI mockups", completed: false, priority: "medium", dueDate: daysFromNow(3), createdAt: daysAgo(1), updatedAt: daysAgo(1) },
+]
