@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Pencil, Trash2, Mail } from 'lucide-react'
+import { Plus, Pencil, Trash2, Mail, Key, Shield, Crown, ChevronDown } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import { fetchEmployees, createEmployee, updateEmployee } from '../../redux/slices/employeesSlice'
@@ -15,6 +15,12 @@ import { Avatar, AvatarFallback } from '../../components/ui/avatar'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '../../components/ui/dialog'
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '../../components/ui/select'
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '../../components/ui/dropdown-menu'
 import { FormField } from '../../components/common/FormField'
 import { Input } from '../../components/ui/input'
 import { ConfirmDialog } from '../../components/common/ConfirmDialog'
@@ -28,6 +34,8 @@ const employeeSchema = z.object({
   phone: z.string().min(6, 'Phone is required'),
   city: z.string().min(2, 'City is required'),
   country: z.string().min(2, 'Country is required'),
+  role: z.enum(['employee', 'admin'], { message: 'Select a valid role' }),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
 })
 type EmployeeForm = z.infer<typeof employeeSchema>
 
@@ -37,10 +45,15 @@ export default function EmployeesPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Employee | null>(null)
   const [deleting, setDeleting] = useState<Employee | null>(null)
+  const [settingPassword, setSettingPassword] = useState<Employee | null>(null)
+  const [newPassword, setNewPassword] = useState('')
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<EmployeeForm>({
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<EmployeeForm>({
     resolver: zodResolver(employeeSchema),
+    defaultValues: { role: 'employee' },
   })
+
+  const selectedRole = watch('role')
 
   useEffect(() => {
     dispatch(fetchEmployees('digiayudh'))
@@ -48,7 +61,7 @@ export default function EmployeesPage() {
 
   const openCreate = () => {
     setEditing(null)
-    reset({ name: '', email: '', position: '', department: '', phone: '', city: '', country: '' })
+    reset({ name: '', email: '', position: '', department: '', phone: '', city: '', country: '', role: 'employee', password: '' })
     setDialogOpen(true)
   }
 
@@ -56,7 +69,7 @@ export default function EmployeesPage() {
     setEditing(emp)
     reset({
       name: emp.name, email: emp.email, position: emp.position, department: emp.department,
-      phone: emp.phone, city: emp.city, country: emp.country,
+      phone: emp.phone, city: emp.city, country: emp.country, role: emp.role || 'employee',
     })
     setDialogOpen(true)
   }
@@ -84,6 +97,30 @@ export default function EmployeesPage() {
     setDeleting(null)
   }
 
+  const handleSetPassword = async () => {
+    if (!settingPassword || !newPassword) {
+      toast.error('Password is required')
+      return
+    }
+    try {
+      await dispatch(updateEmployee({ id: settingPassword._id, data: { password: newPassword } })).unwrap()
+      toast.success('Password updated successfully')
+      setSettingPassword(null)
+      setNewPassword('')
+    } catch (err) {
+      toast.error(typeof err === 'string' ? err : 'Failed to update password')
+    }
+  }
+
+  const handleChangeRole = async (empId: string, newRole: string) => {
+    try {
+      await dispatch(updateEmployee({ id: empId, data: { role: newRole } })).unwrap()
+      toast.success(`Role changed to ${newRole}`)
+    } catch (err) {
+      toast.error(typeof err === 'string' ? err : 'Failed to change role')
+    }
+  }
+
   const columns: Column<Employee>[] = [
     {
       header: 'Employee',
@@ -102,6 +139,16 @@ export default function EmployeesPage() {
     { header: 'Department', accessor: 'department', cell: (row) => <Badge variant="outline">{row.department}</Badge> },
     { header: 'Location', accessor: 'city', cell: (row) => `${row.city}, ${row.country}` },
     {
+      header: 'Role',
+      accessor: 'role',
+      cell: (row) => (
+        <Badge variant={row.role === 'admin' ? 'default' : 'outline'} className="flex w-fit items-center gap-1">
+          {row.role === 'admin' && <Shield className="h-3 w-3" />}
+          {row.role || 'employee'}
+        </Badge>
+      ),
+    },
+    {
       header: 'Status',
       accessor: 'isActive',
       cell: (row) => (
@@ -113,14 +160,41 @@ export default function EmployeesPage() {
     {
       header: '',
       cell: (row) => (
-        <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="icon" onClick={() => openEdit(row)} aria-label="Edit">
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => setDeleting(row)} aria-label="Delete" className="text-destructive">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={() => openEdit(row)}>
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSettingPassword(row)}>
+              <Key className="h-4 w-4 mr-2" />
+              Set Password
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {row.role === 'employee' && (
+              <DropdownMenuItem onClick={() => handleChangeRole(row._id, 'admin')} className="text-blue-600">
+                <Crown className="h-4 w-4 mr-2" />
+                Promote to Admin
+              </DropdownMenuItem>
+            )}
+            {row.role === 'admin' && (
+              <DropdownMenuItem onClick={() => handleChangeRole(row._id, 'employee')} className="text-yellow-600">
+                <Shield className="h-4 w-4 mr-2" />
+                Demote to Employee
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setDeleting(row)} className="text-destructive">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Deactivate
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
     },
   ]
@@ -168,12 +242,53 @@ export default function EmployeesPage() {
               <FormField label="Country" error={errors.country?.message}>
                 <Input {...register('country')} placeholder="USA" />
               </FormField>
+              <FormField label="Role" error={errors.role?.message}>
+                <Select value={selectedRole} onValueChange={(value) => setValue('role', value as 'employee' | 'admin')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormField>
+              {!editing && (
+                <FormField label="Initial Password" error={errors.password?.message}>
+                  <Input type="password" {...register('password')} placeholder="Set password (optional for now)" />
+                </FormField>
+              )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>{editing ? 'Save changes' : 'Add employee'}</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!settingPassword} onOpenChange={(open) => !open && setSettingPassword(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Key className="h-5 w-5" /> Set Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="mb-2 text-sm text-muted-foreground">For: <span className="font-medium">{settingPassword?.name}</span></p>
+              <FormField label="New Password">
+                <Input 
+                  type="password" 
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  placeholder="Enter new password" 
+                />
+              </FormField>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setSettingPassword(null)}>Cancel</Button>
+              <Button onClick={handleSetPassword}>Set Password</Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 

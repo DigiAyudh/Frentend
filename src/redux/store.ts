@@ -12,6 +12,7 @@ import dashboardReducer from './slices/dashboardSlice'
 import businessReducer from './slices/businessSlice'
 import supportReducer from './slices/supportSlice'
 import settingsReducer from './slices/settingsSlice'
+import attendanceReducer from './slices/attendanceSlice'
 
 export const store = configureStore({
   reducer: {

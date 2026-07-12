@@ -208,6 +208,21 @@ class ApiClient {
     return this.client.post('/auth/refresh', { refreshToken })
   }
 
+  requestPasswordReset(email: string) {
+    if (USE_MOCK) return mockApi.requestPasswordReset(email)
+    return this.client.post('/auth/forgot-password', { email })
+  }
+
+  verifyPasswordResetToken(token: string) {
+    if (USE_MOCK) return mockApi.verifyPasswordResetToken(token)
+    return this.client.post('/auth/verify-reset-token', { token })
+  }
+
+  resetPassword(token: string, password: string) {
+    if (USE_MOCK) return mockApi.resetPassword(token, password)
+    return this.client.post('/auth/reset-password', { token, password })
+  }
+
   // Admin employee management
   getEmployeeAccounts() {
     if (USE_MOCK) return mockApi.getEmployeeAccounts()
@@ -415,6 +430,14 @@ class ApiClient {
     if (USE_MOCK) return mockApi.createMeeting(data)
     return this.client.post('/meetings', data)
   }
+  updateMeeting(id: string, data: Record<string, unknown>) {
+    if (USE_MOCK) return mockApi.updateMeeting(id, data)
+    return this.client.put(`/meetings/${id}`, data)
+  }
+  deleteMeeting(id: string) {
+    if (USE_MOCK) return mockApi.deleteMeeting(id)
+    return this.client.delete(`/meetings/${id}`)
+  }
 
   // Documents
   getDocuments(ownerId?: string) {
@@ -447,9 +470,34 @@ class ApiClient {
   }
 
   // Attendance
-  getAttendance() {
+  getAttendance(company: string, date?: string) {
     if (USE_MOCK) return mockApi.getAttendance()
-    return this.client.get('/attendance')
+    const params = new URLSearchParams()
+    if (company) params.append('company', company)
+    if (date) params.append('date', date)
+    return this.client.get(`/attendance?${params.toString()}`)
+  }
+  markAttendance(data: Record<string, unknown>) {
+    if (USE_MOCK) return mockApi.markAttendance(data)
+    return this.client.post('/attendance', data)
+  }
+
+  // Leave Requests
+  getLeaveRequests(company: string) {
+    if (USE_MOCK) return mockApi.getLeaveRequests(company)
+    return this.client.get(`/leaves?company=${company}`)
+  }
+  createLeaveRequest(data: Record<string, unknown>) {
+    if (USE_MOCK) return mockApi.createLeaveRequest(data)
+    return this.client.post('/leaves', data)
+  }
+  approveLeaveRequest(id: string, approvedBy: string) {
+    if (USE_MOCK) return mockApi.approveLeaveRequest(id, approvedBy)
+    return this.client.put(`/leaves/${id}/approve`, { approvedBy })
+  }
+  rejectLeaveRequest(id: string, reason: string) {
+    if (USE_MOCK) return mockApi.rejectLeaveRequest(id, reason)
+    return this.client.put(`/leaves/${id}/reject`, { rejectionReason: reason })
   }
 
   // Dashboard

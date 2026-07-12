@@ -13,6 +13,8 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
 import PendingVerification from './pages/PendingVerification'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import NotFound from './pages/NotFoundPage'
 
 // Admin pages
@@ -24,6 +26,8 @@ import ClientsPage from './pages/admin/ClientsPage'
 import VerificationPage from './pages/admin/VerificationPage'
 import ContactRequestsPage from './pages/admin/ContactRequestsPage'
 import AuditLogsPage from './pages/admin/AuditLogsPage'
+import AdminMeetingsPage from './pages/admin/AdminMeetingsPage'
+import AdminTasksPage from './pages/admin/AdminTasksPage'
 
 // Employee pages
 import EmployeeDashboard from './pages/employee/EmployeeDashboard'
@@ -60,6 +64,8 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/pending-verification" element={<PendingVerification />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
 
               {/* Admin Dashboard */}
               <Route
@@ -78,9 +84,12 @@ function App() {
                 <Route path="verification" element={<VerificationPage />} />
                 <Route path="projects" element={<ProjectsPage basePath="/admin/projects" />} />
                 <Route path="projects/:id" element={<ProjectDetail />} />
+                <Route path="tasks" element={<AdminTasksPage />} />
                 <Route path="contact-requests" element={<ContactRequestsPage />} />
                 <Route path="invoices" element={<InvoicesPage />} />
                 <Route path="audit-logs" element={<AuditLogsPage />} />
+                <Route path="messages" element={<MessagesPage />} />
+                <Route path="meetings" element={<AdminMeetingsPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
