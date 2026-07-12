@@ -15,6 +15,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage'
 import PendingVerification from './pages/PendingVerification'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import PublicCertificateVerification from './pages/PublicCertificateVerification'
 import NotFound from './pages/NotFoundPage'
 
 // Admin pages
@@ -71,6 +72,7 @@ function App() {
               <Route path="/pending-verification" element={<PendingVerification />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/verify/cert/:token" element={<PublicCertificateVerification />} />
 
               {/* Admin Dashboard */}
               <Route
