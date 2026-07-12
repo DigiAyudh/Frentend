@@ -1,5 +1,7 @@
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
+import { Upload, X } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import { setUser } from '../../redux/slices/authSlice'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -24,6 +26,9 @@ interface FormValues {
 export default function ProfilePage() {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((s) => s.auth)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [previewImage, setPreviewImage] = useState<string | null>(user?.profileImage || null)
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
 
   const { register, handleSubmit, formState: { isDirty } } = useForm<FormValues>({
     defaultValues: {
@@ -35,6 +40,55 @@ export default function ProfilePage() {
       bio: user?.bio || '',
     },
   })
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB')
+      return
+    }
+
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('Only JPG, PNG, and WebP files are allowed')
+      return
+    }
+
+    setIsUploadingPhoto(true)
+    try {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const result = reader.result as string
+        setPreviewImage(result)
+        
+        // In a real app, you would upload to a server/storage service
+        // For now, we'll store in local state and update user
+        if (user) {
+          dispatch(setUser({ ...user, profileImage: result }))
+          toast.success('Profile photo updated successfully')
+        }
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      toast.error('Failed to upload photo')
+    } finally {
+      setIsUploadingPhoto(false)
+    }
+  }
+
+  const handleRemovePhoto = () => {
+    setPreviewImage(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    if (user) {
+      dispatch(setUser({ ...user, profileImage: undefined }))
+      toast.success('Profile photo removed')
+    }
+  }
 
   const onSubmit = (values: FormValues) => {
     if (user) {
@@ -50,10 +104,39 @@ export default function ProfilePage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={user?.profileImage} alt={user?.name} />
-              <AvatarFallback className="text-2xl">{getInitials(user?.name || 'U')}</AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={previewImage || user?.profileImage} alt={user?.name} />
+                <AvatarFallback className="text-2xl">{getInitials(user?.name || 'U')}</AvatarFallback>
+              </Avatar>
+              {previewImage && (
+                <button
+                  onClick={handleRemovePhoto}
+                  className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-white hover:bg-destructive/90"
+                  title="Remove photo"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingPhoto}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              {isUploadingPhoto ? 'Uploading...' : 'Upload Photo'}
+            </Button>
+            <p className="text-xs text-text-light">Max 5MB • JPG, PNG, WebP</p>
             <div>
               <h3 className="text-lg font-semibold">{user?.name}</h3>
               <p className="text-sm text-text-light">{user?.email}</p>

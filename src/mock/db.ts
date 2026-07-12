@@ -443,3 +443,22 @@ export let leaveRequests: Array<{
   { _id: "leave_1", employeeId: "u_emp_1", employeeName: "James Wilson", startDate: daysFromNow(7).toISOString().split('T')[0], endDate: daysFromNow(9).toISOString().split('T')[0], leaveType: "vacation", reason: "Summer vacation", status: "pending", createdAt: daysAgo(3).toISOString() },
   { _id: "leave_2", employeeId: "u_emp_2", employeeName: "James Dev", startDate: daysFromNow(14).toISOString().split('T')[0], endDate: daysFromNow(14).toISOString().split('T')[0], leaveType: "sick", reason: "Medical appointment", status: "approved", createdAt: daysAgo(5).toISOString(), approvedBy: "u_admin_1" },
 ]
+
+/* To-Do Lists -------------------------------------------------------- */
+export let todos: Array<{
+  _id: string
+  taskId: string
+  employeeId: string
+  title: string
+  description?: string
+  completed: boolean
+  priority: 'low' | 'medium' | 'high'
+  dueDate?: Date
+  createdAt: Date
+  updatedAt: Date
+}> = [
+  { _id: "todo_1", taskId: "t_1", employeeId: "u_emp_1", title: "Complete project documentation", description: "Write comprehensive docs for API", completed: false, priority: "high", dueDate: daysFromNow(2), createdAt: daysAgo(1), updatedAt: daysAgo(1) },
+  { _id: "todo_2", taskId: "t_1", employeeId: "u_emp_1", title: "Review pull request from John", completed: false, priority: "medium", dueDate: daysFromNow(1), createdAt: daysAgo(2), updatedAt: daysAgo(1) },
+  { _id: "todo_3", taskId: "t_2", employeeId: "u_emp_1", title: "Update database schema", completed: true, priority: "high", dueDate: daysAgo(1), createdAt: daysAgo(5), updatedAt: daysAgo(1) },
+  { _id: "todo_4", taskId: "t_3", employeeId: "u_emp_2", title: "Design UI mockups", completed: false, priority: "medium", dueDate: daysFromNow(3), createdAt: daysAgo(1), updatedAt: daysAgo(1) },
+]

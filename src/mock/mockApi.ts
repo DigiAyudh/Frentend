@@ -651,6 +651,33 @@ export const mockApi = {
     leave.rejectionReason = reason
     return delay({ success: true, data: leave })
   },
+
+  // To-Do Lists
+  getToDos(employeeId: string) {
+    if (!db.todos) db.todos = []
+    const todos = db.todos.filter((t: any) => t.employeeId === employeeId)
+    return delay({ success: true, data: todos })
+  },
+  createToDo(data: any) {
+    if (!db.todos) db.todos = []
+    const newTodo = { _id: db.uid("todo"), ...data, createdAt: new Date(), updatedAt: new Date() }
+    db.todos.push(newTodo)
+    return delay({ success: true, data: newTodo })
+  },
+  updateToDo(id: string, data: any) {
+    if (!db.todos) return fail("To-Do not found", 404)
+    const todo = db.todos.find((t: any) => t._id === id)
+    if (!todo) return fail("To-Do not found", 404)
+    Object.assign(todo, { ...data, updatedAt: new Date() })
+    return delay({ success: true, data: todo })
+  },
+  deleteToDo(id: string) {
+    if (!db.todos) return fail("To-Do not found", 404)
+    const idx = db.todos.findIndex((t: any) => t._id === id)
+    if (idx === -1) return fail("To-Do not found", 404)
+    db.todos.splice(idx, 1)
+    return delay({ success: true })
+  },
 }
 
 export type MockApi = typeof mockApi

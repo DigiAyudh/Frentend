@@ -506,6 +506,24 @@ class ApiClient {
     return this.client.get(`/dashboard/stats?role=${role}`)
   }
 
+  // To-Do Lists
+  getToDos(employeeId: string) {
+    if (USE_MOCK) return mockApi.getToDos(employeeId)
+    return this.client.get(`/todos?employeeId=${employeeId}`)
+  }
+  createToDo(data: Record<string, unknown>) {
+    if (USE_MOCK) return mockApi.createToDo(data)
+    return this.client.post('/todos', data)
+  }
+  updateToDo(id: string, data: Record<string, unknown>) {
+    if (USE_MOCK) return mockApi.updateToDo(id, data)
+    return this.client.put(`/todos/${id}`, data)
+  }
+  deleteToDo(id: string) {
+    if (USE_MOCK) return mockApi.deleteToDo(id)
+    return this.client.delete(`/todos/${id}`)
+  }
+
   // Reports
   getReports(company: string) {
     return this.client.get(`/reports?company=${company}`)
