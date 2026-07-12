@@ -41,6 +41,7 @@ export default function ProfilePage() {
   const [previewImage, setPreviewImage] = useState<string | null>(user?.profileImage || null)
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const isClient = user?.role === 'client'
   const [employeeCertificates, setEmployeeCertificates] = useState<Certificate[]>([
     {
       _id: 'emp_cert_1',
@@ -204,8 +205,8 @@ export default function ProfilePage() {
         </Card>
       </div>
 
-      {/* Certificates Section */}
-      {employeeCertificates.length > 0 && (
+      {/* Certificates Section - Only visible to employees and admins */}
+      {!isClient && employeeCertificates.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Award className="h-5 w-5" />Certificates & Credentials</CardTitle>

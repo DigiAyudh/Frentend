@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Plus, Trash2, Download, ExternalLink, Copy, Check } from 'lucide-react'
+import { Plus, Trash2, Download, ExternalLink, Copy, Check, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAppSelector } from '../../redux/hooks'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -129,6 +129,15 @@ export default function CertificatesPage() {
 
   return (
     <div className="space-y-6">
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="p-4 flex gap-3">
+          <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+          <p className="text-sm text-foreground">
+            Only administrators can create and manage employee certificates. Employees will see their certificates on their profile with public verification links.
+          </p>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between">
         <PageHeader
           title="Certificates & Experience Letters"

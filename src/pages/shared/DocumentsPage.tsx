@@ -54,6 +54,9 @@ export default function DocumentsPage() {
   const [allDocs, setAllDocs] = useState<Document[]>([])
 
   const isClient = user?.role === 'client'
+  const isEmployee = user?.role === 'employee'
+  const isAdmin = user?.role === 'admin'
+  const canUpload = isClient || isEmployee || isAdmin
 
   useEffect(() => {
     dispatch(fetchDocuments())
@@ -79,6 +82,27 @@ export default function DocumentsPage() {
         type: 'link',
         url: 'https://api.example.com/docs',
         visibleTo: ['admin', 'employee', 'client'],
+      },
+      {
+        _id: 'doc2',
+        name: 'Technical Implementation Guide',
+        category: 'report',
+        size: 3145728,
+        createdAt: '2024-01-18',
+        uploadedBy: 'james.dev@digiayudh.com',
+        type: 'file',
+        visibleTo: ['admin', 'employee', 'client'],
+      },
+      {
+        _id: 'link2',
+        name: 'GitHub Repository',
+        category: 'report',
+        size: 0,
+        createdAt: '2024-01-12',
+        uploadedBy: 'james.dev@digiayudh.com',
+        type: 'link',
+        url: 'https://github.com/company/project',
+        visibleTo: ['admin', 'employee'],
       },
     ])
   }, [dispatch])
@@ -134,7 +158,12 @@ export default function DocumentsPage() {
     setLinkTitle('')
   }
 
-  const handleDeleteDoc = (id: string) => {
+  const handleDeleteDoc = (id: string, uploadedBy: string) => {
+    // Only allow deletion by the uploader or admins
+    if (user?.email !== uploadedBy && !isAdmin) {
+      toast.error('You can only delete documents you uploaded')
+      return
+    }
     if (window.confirm('Delete this document?')) {
       setAllDocs(allDocs.filter(d => d._id !== id))
       toast.success('Document deleted')
@@ -143,9 +172,22 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-6">
+      {canUpload && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <p className="text-sm text-blue-900">
+              {isClient && "As a client, you can upload and share documents with team members."}
+              {isEmployee && "As an employee, you can upload and share documents with admins and clients."}
+              {isAdmin && "As an admin, you can upload and share documents with all team members."}
+              {" "}Documents and links are visible to authorized team members.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex items-center justify-between">
         <PageHeader title="Documents" subtitle="Contracts, reports and shared files." />
-        {isClient && (
+        {canUpload && (
           <div className="flex gap-2">
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger asChild>
@@ -251,12 +293,12 @@ export default function DocumentsPage() {
                         <Button variant="ghost" size="icon" title={`Download ${doc.name}`}>
                           <Download className="h-4 w-4" />
                         </Button>
-                        {isClient && (
+                        {canUpload && (user?.email === doc.uploadedBy || isAdmin) && (
                           <Button
                             variant="ghost"
                             size="icon"
                             className="text-destructive"
-                            onClick={() => handleDeleteDoc(doc._id)}
+                            onClick={() => handleDeleteDoc(doc._id, doc.uploadedBy)}
                             title="Delete"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -296,12 +338,12 @@ export default function DocumentsPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {isClient && (
+                      {canUpload && (user?.email === doc.uploadedBy || isAdmin) && (
                         <Button
                           variant="ghost"
                           size="icon"
                           className="text-destructive"
-                          onClick={() => handleDeleteDoc(doc._id)}
+                          onClick={() => handleDeleteDoc(doc._id, doc.uploadedBy)}
                           title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />
