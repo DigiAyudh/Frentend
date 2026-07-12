@@ -28,6 +28,8 @@ import ContactRequestsPage from './pages/admin/ContactRequestsPage'
 import AuditLogsPage from './pages/admin/AuditLogsPage'
 import AdminMeetingsPage from './pages/admin/AdminMeetingsPage'
 import AdminTasksPage from './pages/admin/AdminTasksPage'
+import AdminAttendancePage from './pages/admin/AttendancePage'
+import AdminLeaveRequestsPage from './pages/admin/LeaveRequestsPage'
 
 // Employee pages
 import EmployeeDashboard from './pages/employee/EmployeeDashboard'
@@ -85,6 +87,8 @@ function App() {
                 <Route path="projects" element={<ProjectsPage basePath="/admin/projects" />} />
                 <Route path="projects/:id" element={<ProjectDetail />} />
                 <Route path="tasks" element={<AdminTasksPage />} />
+                <Route path="attendance" element={<AdminAttendancePage />} />
+                <Route path="leave-requests" element={<AdminLeaveRequestsPage />} />
                 <Route path="contact-requests" element={<ContactRequestsPage />} />
                 <Route path="invoices" element={<InvoicesPage />} />
                 <Route path="audit-logs" element={<AuditLogsPage />} />

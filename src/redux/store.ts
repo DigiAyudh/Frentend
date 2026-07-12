@@ -29,6 +29,7 @@ export const store = configureStore({
     business: businessReducer,
     support: supportReducer,
     settings: settingsReducer,
+    attendance: attendanceReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
