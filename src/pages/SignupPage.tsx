@@ -20,7 +20,7 @@ import 'react-phone-input-2/lib/style.css'
 import { useForm, Controller } from 'react-hook-form'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-
+import '../index.css'
 
 
 
@@ -156,31 +156,6 @@ export default function SignupPage() {
                   if (country && typeof country !== 'string') {
                     setValue('countryCode', `+${country.dialCode}`)
                   }
-                }}
-                inputStyle={{
-                  width: '100%',
-                  height: '46px',
-                  background: '#0F172A',
-                  color: '#fff',
-                  border: '1px solid #334155',
-                  borderRadius: '12px',
-                  paddingLeft: '52px',
-                  fontSize: '14px',
-                }}
-                buttonStyle={{
-                  background: '#0F172A',
-                  border: '1px solid #334155',
-                  borderRadius: '12px 0 0 12px',
-                }}
-                dropdownStyle={{
-                  background: '#0F172A',
-                  color: '#fff',
-                  border: '1px solid #334155',
-                  maxHeight: '300px',
-                }}
-                searchStyle={{
-                  background: '#1E293B',
-                  color: '#fff',
                 }}
               />
             )}

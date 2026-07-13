@@ -13,6 +13,7 @@ import { Textarea } from '../ui/textarea'
 import { FormField } from '../common/FormField'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
+import '../../index.css'
 
 const schema = z.object({
   name: z.string().min(2, 'Please enter your name'),
@@ -87,9 +88,9 @@ export function ContactSection() {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8"
+            className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8 "
           >
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 ">
               <FormField label="Name" htmlFor="c-name" error={errors.name?.message} required>
                 <Input id="c-name" placeholder="Ayush" {...register('name')} />
               </FormField>
@@ -102,39 +103,14 @@ export function ContactSection() {
                   control={control}
                   render={({ field }) => (
                     <PhoneInput
-                      country="us"
+                      country="in"
                       enableSearch
                       value={field.value || ''}
                       onChange={(value, country) => {
                         field.onChange(value)
                         if (country && typeof country !== 'string') {
-                          setValue('countryCode', `+${country.dialCode}`)
+                          setValue('countryCode', `+${country.dialCode} `)
                         }
-                      }}
-                      inputStyle={{
-                        width: '100%',
-                        height: '40px',
-                        background: 'hsl(var(--input))',
-                        color: 'hsl(var(--foreground))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        paddingLeft: '52px',
-                        fontSize: '14px',
-                      }}
-                      buttonStyle={{
-                        background: 'hsl(var(--input))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px 0 0 8px',
-                      }}
-                      dropdownStyle={{
-                        background: 'hsl(var(--card))',
-                        color: 'hsl(var(--foreground))',
-                        border: '1px solid hsl(var(--border))',
-                        maxHeight: '300px',
-                      }}
-                      searchStyle={{
-                        background: 'hsl(var(--input))',
-                        color: 'hsl(var(--foreground))',
                       }}
                     />
                   )}
