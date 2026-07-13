@@ -45,18 +45,27 @@ class ApiClient {
   readonly useMock = USE_MOCK
 
   constructor() {
+
     this.client = axios.create({
-      baseURL: API_BASE_URL,
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
-        'X-XSS-Protection': '1; mode=block',
-        'Referrer-Policy': 'strict-origin-when-cross-origin',
-      },
-      timeout: 30000,
-      withCredentials: true, // Enable CORS credentials
-    })
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000,
+  withCredentials: true,
+})
+    // this.client = axios.create({
+    //   baseURL: API_BASE_URL,
+    //   headers: { 
+    //     'Content-Type': 'application/json',
+    //     'X-Content-Type-Options': 'nosniff',
+    //     'X-Frame-Options': 'DENY',
+    //     'X-XSS-Protection': '1; mode=block',
+    //     'Referrer-Policy': 'strict-origin-when-cross-origin',
+    //   },
+    //   timeout: 30000,
+    //   withCredentials: true, // Enable CORS credentials
+    // })
 
     this.client.interceptors.request.use((config) => {
       const token = localStorage.getItem('token')
@@ -70,9 +79,27 @@ class ApiClient {
         config.headers['X-CSRF-Token'] = csrfToken
       }
       
+
+
+
+
+
+
+
+
       // Add request ID for tracing
-      config.headers['X-Request-ID'] = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      // config.headers['X-Request-ID'] = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       
+
+
+
+
+
+
+
+
+
+
       return config
     })
 
