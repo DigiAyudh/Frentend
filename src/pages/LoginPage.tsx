@@ -66,7 +66,6 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 bg-grid" />
       <div className="pointer-events-none absolute -right-40 -top-40 size-[500px] rounded-full bg-purple-600/5 blur-3xl" />
       <div className="pointer-events-none absolute -left-40 bottom-0 size-[500px] rounded-full bg-blue-600/5 blur-3xl" />
-
       <div className="relative w-full max-w-md">
         <div className="mb-10 text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
