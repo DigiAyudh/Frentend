@@ -569,10 +569,6 @@ export const mockApi = {
     return delay({ success: true, data: db.auditLogs })
   },
 
-  /* ---- Attendance ---- */
-  getAttendance() {
-    return delay({ success: true, data: db.attendance })
-  },
 
   /* ---- Dashboard aggregates ---- */
   getDashboardStats(role: string): Promise<{ data: { success: boolean; data: DashboardStat[] } }> {
