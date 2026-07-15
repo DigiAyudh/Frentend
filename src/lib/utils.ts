@@ -74,11 +74,14 @@ export function formatNumber(n: number) {
   return new Intl.NumberFormat("en-US").format(n)
 }
 
-export function getInitials(name: string) {
+export function getInitials(name?: string | null) {
+  if (!name) return "?";
+
   return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(word => word[0])
     .join("")
-    .toUpperCase()
+    .toUpperCase();
 }

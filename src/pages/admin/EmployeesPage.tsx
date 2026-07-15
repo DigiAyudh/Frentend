@@ -38,14 +38,15 @@ const employeeSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
 })
 type EmployeeForm = z.infer<typeof employeeSchema>
+type EmployeeWithRole = Employee & { role?: 'employee' | 'admin' }
 
 export default function EmployeesPage() {
   const dispatch = useAppDispatch()
   const { employees, loading } = useAppSelector((s) => s.employees)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editing, setEditing] = useState<Employee | null>(null)
-  const [deleting, setDeleting] = useState<Employee | null>(null)
-  const [settingPassword, setSettingPassword] = useState<Employee | null>(null)
+  const [editing, setEditing] = useState<EmployeeWithRole | null>(null)
+  const [deleting, setDeleting] = useState<EmployeeWithRole | null>(null)
+  const [settingPassword, setSettingPassword] = useState<EmployeeWithRole | null>(null)
   const [newPassword, setNewPassword] = useState('')
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<EmployeeForm>({
@@ -65,7 +66,7 @@ export default function EmployeesPage() {
     setDialogOpen(true)
   }
 
-  const openEdit = (emp: Employee) => {
+  const openEdit = (emp: EmployeeWithRole) => {
     setEditing(emp)
     reset({
       name: emp.name, email: emp.email, position: emp.position, department: emp.department,
@@ -121,7 +122,7 @@ export default function EmployeesPage() {
     }
   }
 
-  const columns: Column<Employee>[] = [
+  const columns: Column<EmployeeWithRole>[] = [
     {
       header: 'Employee',
       accessor: 'name',
