@@ -292,5 +292,4 @@ export interface ApiError extends Error {
 export interface LoginCredentials {
   email: string
   password: string
-  expectedRole?: UserRole
 }

@@ -38,28 +38,45 @@ export default function LoginPage() {
 
   const remember = watch('remember');
 
+  // const onSubmit = async (data: LoginFormData) => {
+  //   try {
+  //     const roleMap: Record<string, any> = {
+  //       'client@digiayudh.com': 'client',
+  //       'employee@digiayudh.com': 'employee',
+  //       'admin@digiayudh.com': 'admin',
+  //       'superadmin@digiayudh.com': 'admin',
+  //     };
+  //     const role = roleMap[data.email] || 'client';
+  //     await login(data.email, data.password, role as any);
+  //     toast.success('Welcome back!');
+  //     const dashboardRoutes: Record<string, string> = {
+  //       admin: '/admin',
+  //       employee: '/employee',
+  //       client: '/client',
+  //     };
+  //     navigate(dashboardRoutes[role] || '/client');
+  //   } catch (err) {
+  //     const error = err as ApiError;
+  //     toast.error(error.message ?? 'Login failed');
+  //   }
+  // };
+
   const onSubmit = async (data: LoginFormData) => {
-    try {
-      const roleMap: Record<string, any> = {
-        'client@digiayudh.com': 'client',
-        'employee@digiayudh.com': 'employee',
-        'admin@digiayudh.com': 'admin',
-        'superadmin@digiayudh.com': 'admin',
-      };
-      const role = roleMap[data.email] || 'client';
-      await login(data.email, data.password, role as any);
-      toast.success('Welcome back!');
-      const dashboardRoutes: Record<string, string> = {
-        admin: '/admin',
-        employee: '/employee',
-        client: '/client',
-      };
-      navigate(dashboardRoutes[role] || '/client');
-    } catch (err) {
-      const error = err as ApiError;
-      toast.error(error.message ?? 'Login failed');
-    }
-  };
+  try {
+    const user = await login(data.email, data.password); // no role param
+    toast.success('Welcome back!');
+
+    const dashboardRoutes: Record<string, string> = {
+      admin: '/admin',
+      employee: '/employee',
+      client: '/client',
+    };
+    navigate(dashboardRoutes[user.role] || '/client'); // ✅ actual role se
+  } catch (err) {
+    const error = err as ApiError;
+    toast.error(error.message ?? 'Login failed');
+  }
+};
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4">

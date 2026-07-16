@@ -23,13 +23,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
   const { user, isAuthenticated, loading } = useAppSelector((state) => state.auth);
 
-  const login = useCallback(async (email: string, password: string, expectedRole?: UserRole) => {
-    try {
-      await dispatch(loginAction({ email, password, expectedRole: expectedRole || 'client' })).unwrap();
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Login failed');
-    }
-  }, [dispatch]);
+  // const login = useCallback(async (email: string, password: string, expectedRole?: UserRole) => {
+  //   try {
+  //     await dispatch(loginAction({ email, password, expectedRole: expectedRole || 'client' })).unwrap();
+  //   } catch (error) {
+  //     throw new Error(error instanceof Error ? error.message : 'Login failed');
+  //   }
+  // }, [dispatch]);
+
+  const login = useCallback(async (email: string, password: string) => {
+  try {
+    const result = await dispatch(loginAction({email, password})).unwrap();
+    return result.user; // caller ko real role milega
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Login failed');
+  }
+}, [dispatch]);
 
   const logout = useCallback(async () => {
     try {
