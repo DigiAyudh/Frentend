@@ -17,7 +17,7 @@ export function PortfolioSection() {
           description="Real solutions, designed around real business goals."
         />
 
-        <div className="mt-16 space-y-6">
+        <div className="mt-16 flex flex-col gap-6 lg:gap-8">
           {featured && (
             <motion.a
               href="#contact"
@@ -25,7 +25,7 @@ export function PortfolioSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               whileHover={{ y: -4 }}
-              className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5"
+              className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5"
             >
               <div className="grid lg:grid-cols-2">
                 <div
@@ -73,7 +73,7 @@ export function PortfolioSection() {
             </motion.a>
           )}
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:gap-8">
             {others.map((project, i) => (
               <motion.a
                 key={project.id}
@@ -83,7 +83,7 @@ export function PortfolioSection() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -4 }}
-                className="group overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-purple-500/30"
+                className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:border-purple-500/30 hover:shadow-md"
               >
                 <div
                   className={cn(
