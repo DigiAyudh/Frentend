@@ -23,7 +23,7 @@ export function HeroSection() {
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/10 px-4 py-1.5 text-xs font-medium text-purple-400"
+            className="inline-flex items-center gap-12 rounded-full border border-purple-500/20 bg-purple-500/10 px-4 py-1.5 text-xs font-medium text-purple-400"
           >
             ✦ {APP_CONFIG.tagline}
           </motion.span>
@@ -35,10 +35,12 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl"
+              className="hero-heading-font text-4xl font-extrabold leading-[1.25] tracking-tight sm:text-5xl lg:text-6xl"
             >
               We build digital products that{' '}
-              <span className="text-violet-500">move businesses</span>{' '}
+              <span className="mx-2 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-violet-500 bg-clip-text font-semibold tracking-[0.08em] text-transparent drop-shadow-[0_0_18px_rgba(167,139,250,0.25)]">
+                move businesses
+              </span>{' '}
               forward.
             </motion.h1>
 
@@ -46,7 +48,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="mt-6 max-w-xl text-lg text-muted-foreground"
+              className="mt-6 max-w-xl gap-12 text-lg leading-8 text-muted-foreground"
             >
               From a powerful first website to a complete business operating system—we design,
               build and launch digital experiences made for real growth.
@@ -93,7 +95,9 @@ export function HeroSection() {
                 </div>
               </div>
               <div>
-                <p className="text-sm font-medium">★★★★★ 4.9</p>
+                <p className="text-sm font-medium text-white">
+                  <span className="text-amber-400">★★★★★</span> 4.9
+                </p>
                 <p className="text-xs text-muted-foreground">
                   Trusted by 120+ growing businesses
                 </p>
