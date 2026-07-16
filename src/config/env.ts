@@ -16,12 +16,12 @@ export const ENV = {
   TOKEN_KEY: 'auth_token',
   REFRESH_TOKEN_KEY: 'refresh_token',
   TOKEN_EXPIRY_CHECK_INTERVAL: 60000, // Check every 1 minute
-  TOKEN_REFRESH_THRESHOLD: 5 * 60000, // Refresh if expiring within 5 minutes
+  TOKEN_REFRESH_THRESHOLD: 24 * 60 * 60 * 1000, // 1 day before expiry
   
   // Session Configuration
-  SESSION_TIMEOUT: 30 * 60000, // 30 minutes of inactivity
-  SESSION_WARNING_TIME: 27 * 60000, // Warn 3 minutes before timeout
-  
+  SESSION_TIMEOUT: 24 * 24 * 60 * 60 * 1000, // 24 days (safe for setTimeout)
+  SESSION_WARNING_TIME: 22 * 24 * 60 * 60 * 1000, // Warn 1 day before timeout
+
   // CORS Configuration
   CORS_CREDENTIALS: 'include' as const,
   
