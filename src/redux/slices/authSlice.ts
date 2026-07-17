@@ -105,6 +105,18 @@ export const fetchCurrentUser = createAsyncThunk(
   }
 )
 
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (data: Record<string, unknown>, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.updateProfile(data)
+      return response.data.user || response.data
+    } catch (error) {
+      return rejectWithValue(apiClient.getErrorMessage(error))
+    }
+  }
+)
+
 export const logout = createAsyncThunk('auth/logout', async () => {
   try {
     await apiClient.logout()
@@ -191,6 +203,18 @@ const authSlice = createSlice({
         state.user = null
         state.token = null
         state.isAuthenticated = false
+      })
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false
+        state.user = action.payload
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null

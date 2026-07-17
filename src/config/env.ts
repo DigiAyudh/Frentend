@@ -19,8 +19,8 @@ export const ENV = {
   TOKEN_REFRESH_THRESHOLD: 24 * 60 * 60 * 1000, // 1 day before expiry
   
   // Session Configuration
-  SESSION_TIMEOUT: 24 * 24 * 60 * 60 * 1000, // 24 days (safe for setTimeout)
-  SESSION_WARNING_TIME: 22 * 24 * 60 * 60 * 1000, // Warn 1 day before timeout
+  SESSION_TIMEOUT: 30 * 24 * 60 * 60 * 1000, // 30 days (safe for setTimeout)
+  SESSION_WARNING_TIME: 29 * 24 * 60 * 60 * 1000, // Warn 1 day before timeout
 
   // CORS Configuration
   CORS_CREDENTIALS: 'include' as const,

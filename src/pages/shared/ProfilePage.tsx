@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { Upload, X, ExternalLink, Copy, Check, Award } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
-import { setUser } from '../../redux/slices/authSlice'
+import { setUser, updateProfile } from '../../redux/slices/authSlice'
 import { PageHeader } from '../../components/common/PageHeader'
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
@@ -60,7 +60,7 @@ export default function ProfilePage() {
     },
   ])
 
-  const { register, handleSubmit, formState: { isDirty } } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { isDirty }, reset } = useForm<FormValues>({
     defaultValues: {
       name: user?.name || '',
       phone: user?.phone || '',
@@ -70,6 +70,8 @@ export default function ProfilePage() {
       bio: user?.bio || '',
     },
   })
+  
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -127,10 +129,18 @@ export default function ProfilePage() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const onSubmit = (values: FormValues) => {
-    if (user) {
-      dispatch(setUser({ ...user, ...values }))
-      toast.success('Profile updated')
+  const onSubmit = async (values: FormValues) => {
+    if (!user) return
+    
+    setIsSubmitting(true)
+    try {
+      await dispatch(updateProfile({ ...values, id: user._id })).unwrap()
+      toast.success('Profile updated successfully')
+      reset(values)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update profile')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -198,7 +208,9 @@ export default function ProfilePage() {
               </div>
               <FormField label="Bio"><Textarea rows={3} {...register('bio')} placeholder="A short bio..." /></FormField>
               <div className="flex justify-end">
-                <Button type="submit" disabled={!isDirty}>Save Changes</Button>
+                <Button type="submit" disabled={!isDirty || isSubmitting}>
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </Button>
               </div>
             </form>
           </CardContent>
