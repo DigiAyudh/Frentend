@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Plus, Trash2, Download, ExternalLink, Copy, Check, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAppSelector } from '../../redux/hooks'
+import apiClient from '../../services/api'
 import { PageHeader } from '../../components/common/PageHeader'
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
@@ -38,37 +39,29 @@ export default function CertificatesPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const [certificates, setCertificates] = useState<Certificate[]>([
-    {
-      _id: 'cert1',
-      employeeId: 'u_emp_1',
-      employeeName: 'James Wilson',
-      employeeEmail: 'james@mail.com',
-      title: 'AWS Solutions Architect',
-      issueDate: '2024-01-15',
-      expiryDate: '2025-01-15',
-      certificateUrl: '#',
-      verificationToken: 'verify_token_1',
-      verificationUrl: `${window.location.origin}/verify/cert/verify_token_1`,
-      createdAt: '2024-01-15',
-      issuedBy: 'admin@mail.com',
-    },
-    {
-      _id: 'cert2',
-      employeeId: 'u_emp_2',
-      employeeName: 'Maya Patel',
-      employeeEmail: 'maya@mail.com',
-      title: 'Google Cloud Professional Data Engineer',
-      issueDate: '2024-01-10',
-      expiryDate: '2026-01-10',
-      certificateUrl: '#',
-      verificationToken: 'verify_token_2',
-      verificationUrl: `${window.location.origin}/verify/cert/verify_token_2`,
-      createdAt: '2024-01-10',
-      issuedBy: 'admin@mail.com',
-    },
-  ])
+  const [certificates, setCertificates] = useState<Certificate[]>([])
+
+  // Fetch certificates from backend on component mount
+  useEffect(() => {
+    const fetchCertificates = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const response = await apiClient.getCertificates()
+        setCertificates(response.data.certificates || response.data)
+      } catch (err) {
+        console.error('[v0] Failed to fetch certificates:', err)
+        setError(apiClient.getErrorMessage(err) || 'Failed to load certificates')
+        setCertificates([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchCertificates()
+  }, [])
 
   const [formData, setFormData] = useState({
     employeeName: '',
@@ -78,37 +71,41 @@ export default function CertificatesPage() {
     expiryDate: '',
   })
 
-  const handleAddCertificate = () => {
+  const handleAddCertificate = async () => {
     if (!formData.employeeName || !formData.title || !formData.issueDate) {
       toast.error('Please fill in all required fields')
       return
     }
 
-    const newCert: Certificate = {
-      _id: `cert${Date.now()}`,
-      employeeId: `u_emp_${Date.now()}`,
-      employeeName: formData.employeeName,
-      employeeEmail: formData.employeeEmail,
-      title: formData.title,
-      issueDate: formData.issueDate,
-      expiryDate: formData.expiryDate,
-      certificateUrl: '#',
-      verificationToken: `verify_token_${Date.now()}`,
-      verificationUrl: `${window.location.origin}/verify/cert/verify_token_${Date.now()}`,
-      createdAt: new Date().toISOString().split('T')[0],
-      issuedBy: user?.email || 'admin',
-    }
+    try {
+      const response = await apiClient.issueCertificate({
+        employeeName: formData.employeeName,
+        employeeEmail: formData.employeeEmail,
+        title: formData.title,
+        issueDate: formData.issueDate,
+        expiryDate: formData.expiryDate || undefined,
+        issuedBy: user?.email || 'admin',
+      })
 
-    setCertificates([newCert, ...certificates])
-    toast.success('Certificate added successfully')
-    setFormData({ employeeName: '', employeeEmail: '', title: '', issueDate: '', expiryDate: '' })
-    setIsOpen(false)
+      const newCert = response.data.certificate || response.data
+      setCertificates([newCert, ...certificates])
+      toast.success('Certificate issued successfully')
+      setFormData({ employeeName: '', employeeEmail: '', title: '', issueDate: '', expiryDate: '' })
+      setIsOpen(false)
+    } catch (err) {
+      toast.error(apiClient.getErrorMessage(err) || 'Failed to issue certificate')
+    }
   }
 
-  const handleDeleteCertificate = (id: string) => {
+  const handleDeleteCertificate = async (id: string) => {
     if (window.confirm('Delete this certificate?')) {
-      setCertificates(certificates.filter((c) => c._id !== id))
-      toast.success('Certificate deleted')
+      try {
+        await apiClient.deleteCertificate(id)
+        setCertificates(certificates.filter((c) => c._id !== id))
+        toast.success('Certificate deleted successfully')
+      } catch (err) {
+        toast.error(apiClient.getErrorMessage(err) || 'Failed to delete certificate')
+      }
     }
   }
 
@@ -137,6 +134,18 @@ export default function CertificatesPage() {
           </p>
         </CardContent>
       </Card>
+
+      {error && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="p-4 flex gap-3">
+            <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-destructive">Error loading certificates</p>
+              <p className="text-sm text-destructive/80 mt-1">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex items-center justify-between">
         <PageHeader

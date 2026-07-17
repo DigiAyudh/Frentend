@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { Upload, X, ExternalLink, Copy, Check, Award } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import { setUser, updateProfile } from '../../redux/slices/authSlice'
+import apiClient from '../../services/api'
 import { PageHeader } from '../../components/common/PageHeader'
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
@@ -42,23 +43,28 @@ export default function ProfilePage() {
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const isClient = user?.role === 'client'
-  const [employeeCertificates, setEmployeeCertificates] = useState<Certificate[]>([
-    {
-      _id: 'emp_cert_1',
-      title: 'AWS Solutions Architect',
-      issueDate: '2024-01-15',
-      expiryDate: '2025-01-15',
-      verificationUrl: `${window.location.origin}/verify/cert/verify_token_emp_1`,
-      issuedBy: 'admin@company.com',
-    },
-    {
-      _id: 'emp_cert_2',
-      title: 'React Advanced Patterns',
-      issueDate: '2023-06-20',
-      verificationUrl: `${window.location.origin}/verify/cert/verify_token_emp_2`,
-      issuedBy: 'admin@company.com',
-    },
-  ])
+  const [employeeCertificates, setEmployeeCertificates] = useState<Certificate[]>([])
+  const [isLoadingCerts, setIsLoadingCerts] = useState(!isClient)
+
+  // Fetch employee certificates on mount
+  useEffect(() => {
+    if (isClient || !user?._id) return
+    
+    const fetchCertificates = async () => {
+      setIsLoadingCerts(true)
+      try {
+        const response = await apiClient.getCertificatesByEmployee(user._id)
+        setEmployeeCertificates(response.data.certificates || response.data)
+      } catch (err) {
+        console.error('[v0] Failed to fetch certificates:', err)
+        setEmployeeCertificates([])
+      } finally {
+        setIsLoadingCerts(false)
+      }
+    }
+    
+    fetchCertificates()
+  }, [user?._id, isClient])
 
   const { register, handleSubmit, formState: { isDirty }, reset } = useForm<FormValues>({
     defaultValues: {
@@ -91,34 +97,44 @@ export default function ProfilePage() {
 
     setIsUploadingPhoto(true)
     try {
+      // Create preview while uploading to backend
       const reader = new FileReader()
       reader.onloadend = () => {
         const result = reader.result as string
         setPreviewImage(result)
-        
-        // In a real app, you would upload to a server/storage service
-        // For now, we'll store in local state and update user
-        if (user) {
-          dispatch(setUser({ ...user, profileImage: result }))
-          toast.success('Profile photo updated successfully')
-        }
       }
       reader.readAsDataURL(file)
+
+      // Upload to backend
+      const response = await apiClient.uploadProfilePicture(file)
+      const uploadedImageUrl = response.data.url || response.data.profileImage
+      
+      if (user) {
+        dispatch(setUser({ ...user, profileImage: uploadedImageUrl }))
+        toast.success('Profile photo updated successfully')
+      }
     } catch (error) {
-      toast.error('Failed to upload photo')
+      toast.error(apiClient.getErrorMessage(error) || 'Failed to upload photo')
+      setPreviewImage(null)
     } finally {
       setIsUploadingPhoto(false)
     }
   }
 
-  const handleRemovePhoto = () => {
+  const handleRemovePhoto = async () => {
     setPreviewImage(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
-    if (user) {
-      dispatch(setUser({ ...user, profileImage: undefined }))
-      toast.success('Profile photo removed')
+    
+    try {
+      await apiClient.deleteProfilePicture()
+      if (user) {
+        dispatch(setUser({ ...user, profileImage: undefined }))
+        toast.success('Profile photo removed')
+      }
+    } catch (error) {
+      toast.error(apiClient.getErrorMessage(error) || 'Failed to remove photo')
     }
   }
 
@@ -218,7 +234,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Certificates Section - Only visible to employees and admins */}
-      {!isClient && employeeCertificates.length > 0 && (
+      {!isClient && !isLoadingCerts && employeeCertificates.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Award className="h-5 w-5" />Certificates & Credentials</CardTitle>

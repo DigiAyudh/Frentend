@@ -1,8 +1,10 @@
 import { useParams } from 'react-router-dom'
 import { CheckCircle2, AlertCircle, Calendar } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { formatDate } from '../lib/utils'
+import apiClient from '../services/api'
 
 interface CertificateData {
   verificationToken: string
@@ -15,33 +17,37 @@ interface CertificateData {
   isExpired: boolean
 }
 
-// Mock certificate database - in production, this would come from your backend
-const certificateDatabase: Record<string, CertificateData> = {
-  verify_token_1: {
-    verificationToken: 'verify_token_1',
-    employeeName: 'James Wilson',
-    title: 'AWS Solutions Architect Certified',
-    issueDate: '2024-01-15',
-    expiryDate: '2025-01-15',
-    issuedBy: 'Amazon Web Services',
-    isValid: true,
-    isExpired: false,
-  },
-  verify_token_2: {
-    verificationToken: 'verify_token_2',
-    employeeName: 'Maya Patel',
-    title: 'Google Cloud Professional Data Engineer',
-    issueDate: '2024-01-10',
-    expiryDate: '2026-01-10',
-    issuedBy: 'Google Cloud',
-    isValid: true,
-    isExpired: false,
-  },
-}
-
 export default function PublicCertificateVerification() {
   const { token } = useParams<{ token: string }>()
-  const certificate = token ? certificateDatabase[token] : null
+  const [certificate, setCertificate] = useState<CertificateData | null>(null)
+  const [isLoading, setIsLoading] = useState(!!token)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!token) {
+      setIsLoading(false)
+      setError(null)
+      return
+    }
+
+    const verifyCert = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const response = await apiClient.verifyCertificate(token)
+        setCertificate(response.data.certificate || response.data)
+      } catch (err) {
+        console.error('[v0] Certificate verification failed:', err)
+        setError(apiClient.getErrorMessage(err) || 'Certificate not found or verification failed')
+        setCertificate(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    verifyCert()
+  }, [token])
+
   const isExpired = certificate?.expiryDate && new Date(certificate.expiryDate) < new Date()
 
   return (
@@ -49,7 +55,12 @@ export default function PublicCertificateVerification() {
       <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader className="border-b bg-gradient-to-r from-primary/10 to-primary/5">
           <CardTitle className="flex items-center gap-2">
-            {certificate ? (
+            {isLoading ? (
+              <>
+                <AlertCircle className="h-6 w-6 text-primary animate-pulse" />
+                Loading Certificate...
+              </>
+            ) : certificate ? (
               <>
                 <CheckCircle2 className="h-6 w-6 text-green-600" />
                 Certificate Verification
@@ -64,7 +75,14 @@ export default function PublicCertificateVerification() {
         </CardHeader>
 
         <CardContent className="p-8">
-          {certificate ? (
+          {isLoading ? (
+            <div className="space-y-4 text-center">
+              <div className="flex justify-center">
+                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+              </div>
+              <p className="text-text-light">Verifying certificate...</p>
+            </div>
+          ) : certificate ? (
             <div className="space-y-6">
               {/* Status Badge */}
               <div className="flex justify-center">
@@ -148,9 +166,9 @@ export default function PublicCertificateVerification() {
               <div>
                 <h2 className="text-2xl font-bold">Certificate Not Found</h2>
                 <p className="text-text-light mt-2">
-                  {token
+                  {error || (token
                     ? 'The certificate verification token is invalid or has expired.'
-                    : 'No token provided. Please check the verification link.'}
+                    : 'No token provided. Please check the verification link.')}
                 </p>
               </div>
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mt-4">

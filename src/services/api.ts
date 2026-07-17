@@ -455,6 +455,35 @@ class ApiClient {
     return this.client.delete(`/todos/${id}`)
   }
 
+  // Certificates
+  getCertificates() {
+    return this.client.get('/certificates')
+  }
+  getCertificatesByEmployee(employeeId: string) {
+    return this.client.get(`/certificates?employeeId=${employeeId}`)
+  }
+  issueCertificate(data: Record<string, unknown>) {
+    return this.client.post('/certificates', data)
+  }
+  verifyCertificate(token: string) {
+    return this.client.get(`/certificates/verify/${token}`)
+  }
+  deleteCertificate(id: string) {
+    return this.client.delete(`/certificates/${id}`)
+  }
+
+  // File uploads
+  uploadProfilePicture(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return this.client.post('/upload/profile-picture', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  }
+  deleteProfilePicture() {
+    return this.client.delete('/auth/profile-picture')
+  }
+  
   // Reports
   getReports(company: string) {
     return this.client.get(`/reports?company=${company}`)
